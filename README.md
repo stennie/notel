@@ -78,24 +78,87 @@ When `--fix` is combined with `--all` and/or `--verbose`, the audit report is st
 
 ## Supported Tools
 
-| Tool | Environment Variable | Opt-out Value |
-|------|---------------------|---------------|
-| Homebrew | `HOMEBREW_NO_ANALYTICS` | `1` |
-| Yarn (v2+) | `YARN_ENABLE_TELEMETRY` | `0` |
-| Node.js | `DISABLE_TELEMETRY` / `NODE_NO_TELEMETRY` | `1` |
-| .NET SDK | `DOTNET_CLI_TELEMETRY_OPTOUT` | `1` |
-| Flutter | `FLUTTER_CLI_CRASH_REPORTING` | `false` |
-| Next.js | `NEXT_TELEMETRY_DISABLED` | `1` |
-| Gatsby | `GATSBY_TELEMETRY_DISABLED` | `1` |
-| Nuxt | `NUXT_TELEMETRY_DISABLED` | `1` |
-| Angular CLI | `NG_CLI_ANALYTICS` | `false` or `ci` |
-| Astro | `ASTRO_TELEMETRY_DISABLED` | `1` |
-| Turborepo | `TURBO_TELEMETRY_DISABLED` | `1` |
-| Terraform | `CHECKPOINT_DISABLE` | `1` |
-| Google Cloud SDK | `CLOUDSDK_CORE_DISABLE_USAGE_REPORTING` | `true` |
-| Azure CLI | `AZURE_CORE_COLLECT_TELEMETRY` | `0` |
-| Netlify CLI | `NETLIFY_TELEMETRY_DISABLED` | `1` |
-| Sentry CLI | `SENTRY_CLI_NO_TELEMETRY` | `1` |
+### Build
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Turborepo](https://turborepo.com/docs/telemetry) | `TURBO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, host information, and repo or task metrics. |
+
+### Cloud
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Algolia CLI](https://www.algolia.com/doc/tools/cli/telemetry) | `ALGOLIA_CLI_TELEMETRY` | `0` | Command usage, operating system details, CLI version, and local profile metadata. |
+| [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration?view=azure-cli-latest) | `AZURE_CORE_COLLECT_TELEMETRY` | `0` | Command usage, performance metrics, and error-rate telemetry. |
+| [Google Cloud SDK](https://cloud.google.com/sdk/docs/usage-statistics) | `CLOUDSDK_CORE_DISABLE_USAGE_REPORTING` | `true` | Anonymized command execution metrics, timing, and error status. |
+
+### Database
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [CockroachDB](https://www.cockroachlabs.com/docs/stable/diagnostics-reporting) | `COCKROACH_SKIP_ENABLING_DIAGNOSTIC_REPORTING` | `true` | Cluster diagnostics, telemetry, and crash reports sent to Cockroach Labs. |
+
+### Deployment
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Netlify CLI](https://docs.netlify.com/cli/get-started/#usage-data) | `NETLIFY_TELEMETRY_DISABLED` | `1` | Anonymous CLI usage and diagnostic telemetry. |
+
+### Framework
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Angular CLI](https://angular.dev/cli/analytics) | `NG_CLI_ANALYTICS` | `false` or `ci` | Command usage, selected flags, workspace shape, and local version metadata. |
+| [Astro](https://docs.astro.build/en/reference/cli-reference/#astro-telemetry) | `ASTRO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, integration usage, and project metadata. |
+| [Gatsby](https://www.gatsbyjs.com/docs/telemetry/) | `GATSBY_TELEMETRY_DISABLED` | `1` | Anonymous command usage, plugin usage, and machine characteristics. |
+| [Next.js](https://nextjs.org/telemetry) | `NEXT_TELEMETRY_DISABLED` | `1` | Anonymous command usage, session timing, and project or machine characteristics. |
+| [Nuxt](https://github.com/nuxt/telemetry) | `NUXT_TELEMETRY_DISABLED` | `1` | Anonymous command usage, module usage, and environment characteristics. |
+| [Storybook](https://storybook.js.org/docs/configure/telemetry) | `STORYBOOK_DISABLE_TELEMETRY` | `1` | Anonymous framework usage, addon data, and environment metadata. |
+
+### Infrastructure
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Terraform](https://developer.hashicorp.com/terraform/cli/config/environment-variables#checkpoint_disable) | `CHECKPOINT_DISABLE` | `1` | Checkpoint version checks and security bulletin or alert lookups. |
+
+### Monitoring
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Sentry CLI](https://cli.sentry.dev/configuration/) | `SENTRY_CLI_NO_TELEMETRY` | `1` | Anonymous CLI usage and diagnostic telemetry. |
+
+### Package Manager
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Homebrew](https://docs.brew.sh/Analytics) | `HOMEBREW_NO_ANALYTICS` | `1` | Anonymous install events, command usage, and build error metadata. |
+| [Poetry](https://python-poetry.org/docs/configuration/#using-environment-variables) | `POETRY_TELEMETRY_ENABLED` | `0` | Anonymous usage statistics and telemetry about Poetry command execution. |
+| [Yarn (v2+)](https://yarnpkg.com/advanced/telemetry) | `YARN_ENABLE_TELEMETRY` | `0` | Anonymous command usage and version information. |
+
+### Privacy
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Do Not Track](https://donottrack.sh) | `DO_NOT_TRACK` | `1` | Signals a global preference to disable telemetry, analytics, crash reporting, and non-essential tracking. |
+
+### Runtime
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Node.js](https://nodejs.org/api/cli.html#node_no_telemetry1) | `DISABLE_TELEMETRY` / `NODE_NO_TELEMETRY` | `1` | Anonymous runtime and CLI telemetry in Node features that support it. |
+
+### SDK
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [.NET SDK](https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry) | `DOTNET_CLI_TELEMETRY_OPTOUT` | `1` | CLI command usage, SDK versions, and exception metadata. |
+| [Flutter](https://docs.flutter.dev/reference/crash-reporting) | `FLUTTER_CLI_CRASH_REPORTING` | `false` | CLI crash reports, tool usage signals, and local environment metadata. |
+
+### Security
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Semgrep](https://semgrep.dev/docs/metrics) | `SEMGREP_SEND_METRICS` | `off` | Usage metrics about Semgrep runs, registry usage, and login-related activity. |
 
 ## Adding a new tool
 
@@ -138,3 +201,7 @@ notel/
     └── output/
         └── formatter.go  # Lipgloss-styled output
 ```
+
+## Feedback or suggestions?
+
+Bug reports, feature requests, and questions can be posted in the [Issues](https://github.com/stennie/notel/issues) section on GitHub.
