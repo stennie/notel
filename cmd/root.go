@@ -14,6 +14,8 @@ var Version = "dev"
 
 const (
 	Copyright = "Copyright 2026 Stennie Steneker"
+	License   = "License: Apache 2.0"
+	GitHubURL = "GitHub: https://github.com/stennie/notel"
 )
 
 var rootCmd = &cobra.Command{
@@ -48,6 +50,6 @@ var versionCmd = &cobra.Command{
 	Short: "Show the application version",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Fprintf(cmd.OutOrStdout(), "%s version %s\n%s\n", cmd.Root().Name(), Version, Copyright)
+		fmt.Fprintf(cmd.OutOrStdout(), "%s version %s\n%s\n%s\n%s\n", cmd.Root().Name(), Version, Copyright, License, GitHubURL)
 	},
 }

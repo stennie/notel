@@ -88,6 +88,8 @@ func TestVersionCommandIncludesMetadata(t *testing.T) {
 	for _, want := range []string{
 		"notel version",
 		"Copyright 2026 Stennie Steneker",
+		"License: Apache 2.0",
+		"GitHub: https://github.com/stennie/notel",
 	} {
 		if !strings.Contains(output, want) {
 			t.Fatalf("version output missing %q:\n%s", want, output)
