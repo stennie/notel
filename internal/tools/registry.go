@@ -42,6 +42,21 @@ func Registry() []Tool {
 
 		// ── Cloud ───────────────────────────────────────────────────────────────────
 		{
+			Name:             "Algolia CLI",
+			Description:      "Algolia command-line interface for search platform management",
+			DocumentationURL: "https://www.algolia.com/doc/tools/cli/telemetry",
+			DataCollection:   "Command usage, operating system details, CLI version, and local profile metadata.",
+			Binary:           "algolia",
+			Category:         "Cloud",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "ALGOLIA_CLI_TELEMETRY",
+					ValidValues: []string{"0"},
+					Description: "Disables Algolia CLI telemetry collection",
+				},
+			},
+		},
+		{
 			Name:             "Azure CLI",
 			Description:      "Microsoft Azure command-line interface",
 			DocumentationURL: "https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration?view=azure-cli-latest",
@@ -68,6 +83,23 @@ func Registry() []Tool {
 					Name:        "CLOUDSDK_CORE_DISABLE_USAGE_REPORTING",
 					ValidValues: []string{"true", "True", "TRUE", "1"},
 					Description: "Disables Google Cloud SDK usage reporting",
+				},
+			},
+		},
+
+		// ── Database ────────────────────────────────────────────────────────────────
+		{
+			Name:             "CockroachDB",
+			Description:      "Distributed SQL database and CockroachDB command-line tools",
+			DocumentationURL: "https://www.cockroachlabs.com/docs/stable/diagnostics-reporting",
+			DataCollection:   "Cluster diagnostics, telemetry, and crash reports sent to Cockroach Labs.",
+			Binary:           "cockroach",
+			Category:         "Database",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "COCKROACH_SKIP_ENABLING_DIAGNOSTIC_REPORTING",
+					ValidValues: []string{"true", "True", "TRUE", "1"},
+					Description: "Disables CockroachDB diagnostic reporting for new clusters",
 				},
 			},
 		},
@@ -165,6 +197,21 @@ func Registry() []Tool {
 				},
 			},
 		},
+		{
+			Name:             "Storybook",
+			Description:      "Frontend workshop for building UI components and pages in isolation",
+			DocumentationURL: "https://storybook.js.org/docs/configure/telemetry",
+			DataCollection:   "Anonymous framework usage, addon data, and environment metadata.",
+			Binary:           "storybook",
+			Category:         "Framework",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "STORYBOOK_DISABLE_TELEMETRY",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Storybook telemetry",
+				},
+			},
+		},
 
 		// ── Infrastructure ──────────────────────────────────────────────────────────
 		{
@@ -217,6 +264,21 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:             "Poetry",
+			Description:      "Python dependency management and packaging tool",
+			DocumentationURL: "https://python-poetry.org/docs/configuration/#using-environment-variables",
+			DataCollection:   "Anonymous usage statistics and telemetry about Poetry command execution.",
+			Binary:           "poetry",
+			Category:         "Package Manager",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "POETRY_TELEMETRY_ENABLED",
+					ValidValues: []string{"0", "false", "False", "FALSE"},
+					Description: "Disables Poetry telemetry collection",
+				},
+			},
+		},
+		{
 			Name:             "Yarn",
 			Description:      "Fast, reliable JavaScript package manager",
 			DocumentationURL: "https://yarnpkg.com/advanced/telemetry",
@@ -228,6 +290,23 @@ func Registry() []Tool {
 					Name:        "YARN_ENABLE_TELEMETRY",
 					ValidValues: []string{"0", "false", "False", "FALSE"},
 					Description: "Disables Yarn telemetry (Yarn 2+)",
+				},
+			},
+		},
+
+		// ── Privacy ─────────────────────────────────────────────────────────────────
+		{
+			Name:             "Do Not Track",
+			Description:      "Cross-tool environment variable convention for disabling telemetry and tracking",
+			DocumentationURL: "https://donottrack.sh",
+			DataCollection:   "Signals a global preference to disable telemetry, analytics, crash reporting, and non-essential tracking.",
+			Binary:           "",
+			Category:         "Privacy",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "DO_NOT_TRACK",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Signals a global do-not-track preference to tools that honor it",
 				},
 			},
 		},
@@ -282,6 +361,23 @@ func Registry() []Tool {
 					Name:        "FLUTTER_CLI_CRASH_REPORTING",
 					ValidValues: []string{"false", "False", "FALSE", "0"},
 					Description: "Disables Flutter CLI crash reporting",
+				},
+			},
+		},
+
+		// ── Security ────────────────────────────────────────────────────────────────
+		{
+			Name:             "Semgrep",
+			Description:      "Static analysis and code security scanning CLI",
+			DocumentationURL: "https://semgrep.dev/docs/metrics",
+			DataCollection:   "Usage metrics about Semgrep runs, registry usage, and login-related activity.",
+			Binary:           "semgrep",
+			Category:         "Security",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "SEMGREP_SEND_METRICS",
+					ValidValues: []string{"off"},
+					Description: "Disables Semgrep metrics reporting",
 				},
 			},
 		},
