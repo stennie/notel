@@ -1,0 +1,19 @@
+# Build outputs
+/bin/
+/dist/
+/build/
+/*.exe
+/*.exe~
+/*.dll
+/*.so
+/*.dylib
+*.test
+
+# Go coverage
+coverage.out
+*.coverprofile
+
+# OS / editor files
+.DS_Store
+.idea/
+.vscode/
