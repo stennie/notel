@@ -25,6 +25,21 @@ func Registry() []Tool {
 	return []Tool{
 		// ── Build ───────────────────────────────────────────────────────────────────
 		{
+			Name:             "Nx",
+			Description:      "Smart, fast, and extensible build system for monorepos",
+			DocumentationURL: "https://nx.dev/telemetry",
+			DataCollection:   "Anonymous command usage, workspace metadata, and machine characteristics.",
+			Binary:           "nx",
+			Category:         "Build",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "NX_TELEMETRY_DISABLED",
+					ValidValues: []string{"1", "true", "True", "TRUE", "yes", "YES", "Yes"},
+					Description: "Disables Nx telemetry",
+				},
+			},
+		},
+		{
 			Name:             "Turborepo",
 			Description:      "High-performance build system for JavaScript/TypeScript",
 			DocumentationURL: "https://turborepo.com/docs/telemetry",
@@ -153,6 +168,21 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:             "Expo CLI",
+			Description:      "Expo command-line tools for React Native and universal apps",
+			DocumentationURL: "https://docs.expo.dev/workflow/expo-cli/",
+			DataCollection:   "Anonymous CLI usage and diagnostics for Expo development workflows.",
+			Binary:           "expo",
+			Category:         "Framework",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "EXPO_NO_TELEMETRY",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Expo CLI telemetry",
+				},
+			},
+		},
+		{
 			Name:             "Gatsby",
 			Description:      "React-based static site generator",
 			DocumentationURL: "https://www.gatsbyjs.com/docs/telemetry/",
@@ -214,6 +244,21 @@ func Registry() []Tool {
 		},
 
 		// ── Infrastructure ──────────────────────────────────────────────────────────
+		{
+			Name:             "Pulumi",
+			Description:      "Infrastructure as Code platform and CLI",
+			DocumentationURL: "https://www.pulumi.com/docs/using-pulumi/telemetry/#disabling-telemetry",
+			DataCollection:   "Anonymous CLI command usage, stack events, and diagnostic telemetry.",
+			Binary:           "pulumi",
+			Category:         "Infrastructure",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "PULUMI_DISABLE_TELEMETRY",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Pulumi telemetry",
+				},
+			},
+		},
 		{
 			Name:             "Terraform",
 			Description:      "Infrastructure as Code tool by HashiCorp",
@@ -312,6 +357,21 @@ func Registry() []Tool {
 		},
 
 		// ── Runtime ─────────────────────────────────────────────────────────────────
+		{
+			Name:             "Bun",
+			Description:      "Fast all-in-one JavaScript runtime and toolkit",
+			DocumentationURL: "https://bun.sh/docs/runtime/bunfig#telemetry",
+			DataCollection:   "Anonymous telemetry and crash-reporting signals from Bun tooling.",
+			Binary:           "bun",
+			Category:         "Runtime",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "BUN_TELEMETRY_DISABLED",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Bun telemetry",
+				},
+			},
+		},
 		{
 			Name:             "Node.js",
 			Description:      "JavaScript runtime built on Chrome's V8 engine",

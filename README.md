@@ -82,6 +82,7 @@ When `--fix` is combined with `--all` and/or `--verbose`, the audit report is st
 
 | Tool | Environment Variable | Opt-out Value | Data Collection |
 |------|---------------------|---------------|-----------------|
+| [Nx](https://nx.dev/telemetry) | `NX_TELEMETRY_DISABLED` | `1` | Anonymous command usage, workspace metadata, and machine characteristics. |
 | [Turborepo](https://turborepo.com/docs/telemetry) | `TURBO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, host information, and repo or task metrics. |
 
 ### Cloud
@@ -109,6 +110,7 @@ When `--fix` is combined with `--all` and/or `--verbose`, the audit report is st
 | Tool | Environment Variable | Opt-out Value | Data Collection |
 |------|---------------------|---------------|-----------------|
 | [Angular CLI](https://angular.dev/cli/analytics) | `NG_CLI_ANALYTICS` | `false` or `ci` | Command usage, selected flags, workspace shape, and local version metadata. |
+| [Expo CLI](https://docs.expo.dev/workflow/expo-cli/) | `EXPO_NO_TELEMETRY` | `1` | Anonymous CLI usage and diagnostics for Expo development workflows. |
 | [Astro](https://docs.astro.build/en/reference/cli-reference/#astro-telemetry) | `ASTRO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, integration usage, and project metadata. |
 | [Gatsby](https://www.gatsbyjs.com/docs/telemetry/) | `GATSBY_TELEMETRY_DISABLED` | `1` | Anonymous command usage, plugin usage, and machine characteristics. |
 | [Next.js](https://nextjs.org/telemetry) | `NEXT_TELEMETRY_DISABLED` | `1` | Anonymous command usage, session timing, and project or machine characteristics. |
@@ -119,6 +121,7 @@ When `--fix` is combined with `--all` and/or `--verbose`, the audit report is st
 
 | Tool | Environment Variable | Opt-out Value | Data Collection |
 |------|---------------------|---------------|-----------------|
+| [Pulumi](https://www.pulumi.com/docs/using-pulumi/telemetry/#disabling-telemetry) | `PULUMI_DISABLE_TELEMETRY` | `1` | Anonymous CLI command usage, stack events, and diagnostic telemetry. |
 | [Terraform](https://developer.hashicorp.com/terraform/cli/config/environment-variables#checkpoint_disable) | `CHECKPOINT_DISABLE` | `1` | Checkpoint version checks and security bulletin or alert lookups. |
 
 ### Monitoring
@@ -145,6 +148,7 @@ When `--fix` is combined with `--all` and/or `--verbose`, the audit report is st
 
 | Tool | Environment Variable | Opt-out Value | Data Collection |
 |------|---------------------|---------------|-----------------|
+| [Bun](https://bun.sh/docs/runtime/bunfig#telemetry) | `BUN_TELEMETRY_DISABLED` | `1` | Anonymous telemetry and crash-reporting signals from Bun tooling. |
 | [Node.js](https://nodejs.org/api/cli.html#node_no_telemetry1) | `DISABLE_TELEMETRY` / `NODE_NO_TELEMETRY` | `1` | Anonymous runtime and CLI telemetry in Node features that support it. |
 
 ### SDK
