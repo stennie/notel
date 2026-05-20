@@ -45,6 +45,9 @@ check:
 audit:
     go run . audit
 
+audit-all:
+    go run . audit --all
+
 audit-fix:
     go run . audit --fix
 
