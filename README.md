@@ -2,29 +2,42 @@
 
 **notel** audits telemetry opt-out settings across common developer tools.
 
-Telemetry collection is a privacy concern for many developers, especially where collection
-of data may not be obvious without consulting the documentation. Historically every tool has tended to choose unique environment variables or configuration settings which makes it difficult to opt-out by default.
+Telemetry collection is a privacy concern for many developers, especially where
+collection of data may not be obvious without consulting the documentation.
+Historically every tool has tended to choose unique environment variables or
+configuration settings which makes it difficult to opt-out by default.
 
-This tool helps identify and opt-out of telemetry for popular developer tools. It checks
-whether tools are installed and whether the environment variables that disable telemetry
-collection are correctly set.
+This tool helps identify and opt-out of telemetry for popular developer tools.
+The MVP version checks whether CLI tools are installed and if environment
+variables that disable telemetry collection are correctly set. This does not
+yet support other forms of telemetry settings such as config files, although
+there are some hints for command-line equivalents in the notes below on
+supported tools.
 
 ### Why disable telemetry?
 
-- Disabling telemetry exercises your rights to privacy and control over your data and development environments.
-- Poorly considered telemetry collection can potentially impact performance or resources.
-- Telemetry collection may leak unexpected details (internal project names, dependencies, or build configurations) from private build or CI environments.
-- Vendors aren't always up front about telemetry collection practices and details.
+- Disabling telemetry exercises your rights to privacy and control over your
+  data and development environments.
+- Poorly considered telemetry collection can potentially impact performance or
+  resources.
+- Telemetry collection may leak unexpected details (internal project names,
+  dependencies, or build configurations) from private build or CI environments.
+- Vendors aren't always up front about telemetry collection practices and
+  details.
 
 ### Why enable telemetry?
 
-- Telemetry signals can provide insight into tool adoption, usage patterns, and crash information that will help vendors improve the product experience.
-- Aggregated telemetry signals can help product users understand usage of packages, features, and versions.
-- Well-implemented telemetry can have negligible performance impact and can be configured to exclude CI environments.
+- Telemetry signals can provide insight into tool adoption, usage patterns, and
+  crash information that will help vendors improve the product experience.
+- Aggregated telemetry signals can help product users understand usage of
+  packages, features, and versions.
+- Well-implemented telemetry can have negligible performance impact and can be
+  configured to exclude CI environments.
 
 ### DO_NOT_TRACK
 
-There is a proposed [`DO_NOT_TRACK`](https://donottrack.sh/) standard which aims to unambiguously express a user's intent  to opt out of:
+There is a proposed [`DO_NOT_TRACK`](https://donottrack.sh/) standard which
+aims to unambiguously express a user's intent  to opt out of:
 
  - Ad tracking
  - Usage reporting (anonymous or otherwise)
@@ -33,6 +46,17 @@ There is a proposed [`DO_NOT_TRACK`](https://donottrack.sh/) standard which aims
  - Non-essential-to-functionality requests
 
 However, this hasn't been widely adopted yet.
+
+### Related projects
+
+Some interesting open source projects I found on GitHub after scratching my own
+itch to audit telemetry tools in my environments:
+
+ - [`alloydwhitlock/do-not-track-cli`](https://github.com/alloydwhitlock/do-not-track-cli) - A single `.env` file to opt out of telemetry across CLI tools, frameworks, SDKs, and runtimes.
+ - [`beatcracker/toptout`](https://github.com/beatcracker/toptout`) - This
+   project collects data about telemetry in applications in machine-readable
+   format and makes it easy to create derivative works such as awesome-lists,
+   configuration scripts, APIs, etc.
 
 ## Requirements
 
@@ -57,7 +81,8 @@ However, this hasn't been widely adopted yet.
 - `windows/amd64`
 - `windows/arm64`
 
-Release artifacts follow the convention `notel_<version>_<os>_<arch>.tar.gz` or `.zip`, and `dist/SHA256SUMS` is generated for the packaged archives.
+Release artifacts follow the convention `notel_<version>_<os>_<arch>.tar.gz`
+or `.zip`, and `dist/SHA256SUMS` is generated for the packaged archives.
 
 ## Usage
 
@@ -79,7 +104,8 @@ notel [command]
 | `notel version` / `notel --version` | Show the application version |
 | `notel help` | Show help |
 
-When `--fix` is combined with `--all` and/or `--verbose`, the audit report is still shown on `stderr` and the shell commands remain redirect-safe on `stdout`.
+When `--fix` is combined with `--all` and/or `--verbose`, the audit report is
+still shown on `stderr` and the shell commands remain redirect-safe on `stdout`.
 
 ### Example output
 
