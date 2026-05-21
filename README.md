@@ -3,13 +3,36 @@
 **notel** audits telemetry opt-out settings across common developer tools.
 
 Telemetry collection is a privacy concern for many developers, especially where collection
-of data may not be obvious without consulting the documentation.
+of data may not be obvious without consulting the documentation. Historically every tool has tended to choose unique environment variables or configuration settings which makes it difficult to opt-out by default.
 
 This tool helps identify and opt-out of telemetry for popular developer tools. It checks
 whether tools are installed and whether the environment variables that disable telemetry
 collection are correctly set.
 
-Licensed under the Apache License, Version 2.0. See `LICENSE`.
+### Why disable telemetry?
+
+- Disabling telemetry exercises your rights to privacy and control over your data and development environments.
+- Poorly considered telemetry collection can potentially impact performance or resources.
+- Telemetry collection may leak unexpected details (internal project names, dependencies, or build configurations) from private build or CI environments.
+- Vendors aren't always up front about telemetry collection practices and details.
+
+### Why enable telemetry?
+
+- Telemetry signals can provide insight into tool adoption, usage patterns, and crash information that will help vendors improve the product experience.
+- Aggregated telemetry signals can help product users understand usage of packages, features, and versions.
+- Well-implemented telemetry can have negligible performance impact and can be configured to exclude CI environments.
+
+### DO_NOT_TRACK
+
+There is a proposed [`DO_NOT_TRACK`](https://donottrack.sh/) standard which aims to unambiguously express a user's intent  to opt out of:
+
+ - Ad tracking
+ - Usage reporting (anonymous or otherwise)
+ - Telemetry
+ - Crash reporting
+ - Non-essential-to-functionality requests
+
+However, this hasn't been widely adopted yet.
 
 ## Requirements
 
@@ -91,6 +114,7 @@ When `--fix` is combined with `--all` and/or `--verbose`, the audit report is st
 | [Algolia CLI](https://www.algolia.com/doc/tools/cli/telemetry) | `ALGOLIA_CLI_TELEMETRY` | `0` | Command usage, operating system details, CLI version, and local profile metadata. |
 | [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration?view=azure-cli-latest#cli-configuration-values-and-environment-variables) | `AZURE_CORE_COLLECT_TELEMETRY` | `0` | Command usage, performance metrics, and error-rate telemetry.<p><p>`az config set core.collect_telemetry=no`|
 | [CockroachDB](https://www.cockroachlabs.com/docs/stable/telemetry) | `COCKROACH_SKIP_ENABLING`<br/>`_DIAGNOSTIC_REPORTING` | `true` | Cluster diagnostics, telemetry, and crash reports sent to Cockroach Labs.<p><p>NOTE: The environment variable only has effect if be set before initialising the first node of the cluster. After a cluster is running update the  [`diagnostics.reporting.enabled`](https://www.cockroachlabs.com/docs/stable/diagnostics-reporting#at-cluster-initialization) setting. Telemetry is required during the 30 day self-service Enterprise Trial (see: [Licensing FAQs](https://www.cockroachlabs.com/docs/stable/licensing-faqs)).|
+| [GitHub CLI](https://docs.github.com/en/github-cli/github-cli/github-cli-telemetry) | `GH_TELEMETRY` / `DO_NOT_TRACK` | `false` / `1` | Command usage, feature usage, and diagnostic telemetry from the GitHub CLI. <p><p>`gh config get telemetry`<p><p>`gh config set telemetry disabled`<p><p>`gh config set telemetry enabled`|
 | [Google Cloud SDK](https://cloud.google.com/sdk/docs/usage-statistics) | `CLOUDSDK_CORE_DISABLE`<br/>`_USAGE_REPORTING` | `true` | Anonymized command execution metrics, timing, and error status.<p><p> NOTE: Unless you opt-in during Google Cloud CLI installation, gcloud CLI software does not collect usage statistics.<p><p>`gcloud config set disable_usage_reporting` `true|false`|
 | [Netlify CLI](https://docs.netlify.com/api-and-cli-guides/cli-guides/get-started-with-cli/#usage-data-collection) | `NETLIFY_TELEMETRY_DISABLED` | `1` | Anonymous CLI usage and diagnostic telemetry. <p><p>`netlify --telemetry-disable`<p><p>`netlify --telemetry-enable`
 | [Turborepo](https://turborepo.com/docs/telemetry) | `TURBO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, host information, and repo or task metrics. <p><p>`turbo telemetry disable`<p><p>`turbo telemetry enable`<p><p>`turbo telemetry status`|
@@ -173,6 +197,9 @@ notel/
     └── output/
         └── formatter.go  # Lipgloss-styled output
 ```
+
+## License
+Licensed under the Apache License, Version 2.0. See `LICENSE`.
 
 ## Feedback or suggestions?
 
