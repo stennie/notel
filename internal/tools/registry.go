@@ -23,46 +23,31 @@ type Tool struct {
 // To add a new tool, append a new Tool entry here.
 func Registry() []Tool {
 	return []Tool{
-		// ── Build ───────────────────────────────────────────────────────────────────
+		// ── All The Things ───────────────────────────────────────────────────────────
 		{
-			Name:             "Nx",
-			Description:      "Smart, fast, and extensible build system for monorepos",
-			DocumentationURL: "https://nx.dev/telemetry",
-			DataCollection:   "Anonymous command usage, workspace metadata, and machine characteristics.",
-			Binary:           "nx",
-			Category:         "Build",
+			Name:             "Do Not Track",
+			Description:      "Cross-tool environment variable convention for disabling telemetry and tracking",
+			DocumentationURL: "https://donottrack.sh",
+			DataCollection:   "Signals a global preference to disable telemetry, analytics, crash reporting, and non-essential tracking.",
+			Binary:           "",
+			Category:         "All The Things",
 			EnvChecks: []EnvCheck{
 				{
-					Name:        "NX_TELEMETRY_DISABLED",
-					ValidValues: []string{"1", "true", "True", "TRUE", "yes", "YES", "Yes"},
-					Description: "Disables Nx telemetry",
-				},
-			},
-		},
-		{
-			Name:             "Turborepo",
-			Description:      "High-performance build system for JavaScript/TypeScript",
-			DocumentationURL: "https://turborepo.com/docs/telemetry",
-			DataCollection:   "Anonymous command usage, host information, and repo or task metrics.",
-			Binary:           "turbo",
-			Category:         "Build",
-			EnvChecks: []EnvCheck{
-				{
-					Name:        "TURBO_TELEMETRY_DISABLED",
+					Name:        "DO_NOT_TRACK",
 					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Turborepo telemetry",
+					Description: "Signals a global do-not-track preference to tools that honor it",
 				},
 			},
 		},
 
-		// ── Cloud ───────────────────────────────────────────────────────────────────
+		// ── Cloud & Deployment ──────────────────────────────────────────────────────
 		{
 			Name:             "Algolia CLI",
 			Description:      "Algolia command-line interface for search platform management",
 			DocumentationURL: "https://www.algolia.com/doc/tools/cli/telemetry",
 			DataCollection:   "Command usage, operating system details, CLI version, and local profile metadata.",
 			Binary:           "algolia",
-			Category:         "Cloud",
+			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
 				{
 					Name:        "ALGOLIA_CLI_TELEMETRY",
@@ -74,10 +59,10 @@ func Registry() []Tool {
 		{
 			Name:             "Azure CLI",
 			Description:      "Microsoft Azure command-line interface",
-			DocumentationURL: "https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration?view=azure-cli-latest",
+			DocumentationURL: "https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration?view=azure-cli-latest#cli-configuration-values-and-environment-variables",
 			DataCollection:   "Command usage, performance metrics, and error-rate telemetry.",
 			Binary:           "az",
-			Category:         "Cloud",
+			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
 				{
 					Name:        "AZURE_CORE_COLLECT_TELEMETRY",
@@ -87,12 +72,27 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:             "CockroachDB",
+			Description:      "Distributed SQL database and CockroachDB command-line tools",
+			DocumentationURL: "https://www.cockroachlabs.com/docs/stable/telemetry",
+			DataCollection:   "Cluster diagnostics, telemetry, and crash reports sent to Cockroach Labs.",
+			Binary:           "cockroach",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "COCKROACH_SKIP_ENABLING_DIAGNOSTIC_REPORTING",
+					ValidValues: []string{"true", "True", "TRUE", "1"},
+					Description: "Disables CockroachDB diagnostic reporting for new clusters",
+				},
+			},
+		},
+		{
 			Name:             "Google Cloud SDK",
 			Description:      "Google Cloud command-line tools",
 			DocumentationURL: "https://cloud.google.com/sdk/docs/usage-statistics",
 			DataCollection:   "Anonymized command execution metrics, timing, and error status.",
 			Binary:           "gcloud",
-			Category:         "Cloud",
+			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
 				{
 					Name:        "CLOUDSDK_CORE_DISABLE_USAGE_REPORTING",
@@ -102,36 +102,33 @@ func Registry() []Tool {
 			},
 		},
 
-		// ── Database ────────────────────────────────────────────────────────────────
-		{
-			Name:             "CockroachDB",
-			Description:      "Distributed SQL database and CockroachDB command-line tools",
-			DocumentationURL: "https://www.cockroachlabs.com/docs/stable/diagnostics-reporting",
-			DataCollection:   "Cluster diagnostics, telemetry, and crash reports sent to Cockroach Labs.",
-			Binary:           "cockroach",
-			Category:         "Database",
-			EnvChecks: []EnvCheck{
-				{
-					Name:        "COCKROACH_SKIP_ENABLING_DIAGNOSTIC_REPORTING",
-					ValidValues: []string{"true", "True", "TRUE", "1"},
-					Description: "Disables CockroachDB diagnostic reporting for new clusters",
-				},
-			},
-		},
-
-		// ── Deployment ──────────────────────────────────────────────────────────────
 		{
 			Name:             "Netlify CLI",
 			Description:      "Netlify platform CLI",
-			DocumentationURL: "https://docs.netlify.com/cli/get-started/#usage-data",
+			DocumentationURL: "https://docs.netlify.com/api-and-cli-guides/cli-guides/get-started-with-cli/#usage-data-collection",
 			DataCollection:   "Anonymous CLI usage and diagnostic telemetry.",
 			Binary:           "netlify",
-			Category:         "Deployment",
+			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
 				{
 					Name:        "NETLIFY_TELEMETRY_DISABLED",
 					ValidValues: []string{"1", "true", "True", "TRUE"},
 					Description: "Disables Netlify CLI telemetry",
+				},
+			},
+		},
+		{
+			Name:             "Turborepo",
+			Description:      "High-performance build system for JavaScript/TypeScript",
+			DocumentationURL: "https://turborepo.com/docs/telemetry",
+			DataCollection:   "Anonymous command usage, host information, and repo or task metrics.",
+			Binary:           "turbo",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "TURBO_TELEMETRY_DISABLED",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Turborepo telemetry",
 				},
 			},
 		},
@@ -170,7 +167,7 @@ func Registry() []Tool {
 		{
 			Name:             "Expo CLI",
 			Description:      "Expo command-line tools for React Native and universal apps",
-			DocumentationURL: "https://docs.expo.dev/workflow/expo-cli/",
+			DocumentationURL: "https://docs.expo.dev/more/expo-cli/#telemetry",
 			DataCollection:   "Anonymous CLI usage and diagnostics for Expo development workflows.",
 			Binary:           "expo",
 			Category:         "Framework",
@@ -215,7 +212,7 @@ func Registry() []Tool {
 		{
 			Name:             "Nuxt",
 			Description:      "The intuitive Vue framework",
-			DocumentationURL: "https://github.com/nuxt/telemetry",
+			DocumentationURL: "https://github.com/nuxt/telemetry#nuxt-telemetry-module",
 			DataCollection:   "Anonymous command usage, module usage, and environment characteristics.",
 			Binary:           "nuxt",
 			Category:         "Framework",
@@ -237,57 +234,8 @@ func Registry() []Tool {
 			EnvChecks: []EnvCheck{
 				{
 					Name:        "STORYBOOK_DISABLE_TELEMETRY",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
+					ValidValues: []string{"true", "True", "TRUE"},
 					Description: "Disables Storybook telemetry",
-				},
-			},
-		},
-
-		// ── Infrastructure ──────────────────────────────────────────────────────────
-		{
-			Name:             "Pulumi",
-			Description:      "Infrastructure as Code platform and CLI",
-			DocumentationURL: "https://www.pulumi.com/docs/using-pulumi/telemetry/#disabling-telemetry",
-			DataCollection:   "Anonymous CLI command usage, stack events, and diagnostic telemetry.",
-			Binary:           "pulumi",
-			Category:         "Infrastructure",
-			EnvChecks: []EnvCheck{
-				{
-					Name:        "PULUMI_DISABLE_TELEMETRY",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Pulumi telemetry",
-				},
-			},
-		},
-		{
-			Name:             "Terraform",
-			Description:      "Infrastructure as Code tool by HashiCorp",
-			DocumentationURL: "https://developer.hashicorp.com/terraform/cli/config/environment-variables#checkpoint_disable",
-			DataCollection:   "Checkpoint version checks and security bulletin or alert lookups.",
-			Binary:           "terraform",
-			Category:         "Infrastructure",
-			EnvChecks: []EnvCheck{
-				{
-					Name:        "CHECKPOINT_DISABLE",
-					ValidValues: []string{"1"},
-					Description: "Disables HashiCorp Checkpoint (telemetry and version checks)",
-				},
-			},
-		},
-
-		// ── Monitoring ──────────────────────────────────────────────────────────────
-		{
-			Name:             "Sentry CLI",
-			Description:      "Sentry error tracking command-line tool",
-			DocumentationURL: "https://cli.sentry.dev/configuration/",
-			DataCollection:   "Anonymous CLI usage and diagnostic telemetry.",
-			Binary:           "sentry-cli",
-			Category:         "Monitoring",
-			EnvChecks: []EnvCheck{
-				{
-					Name:        "SENTRY_CLI_NO_TELEMETRY",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Sentry CLI telemetry",
 				},
 			},
 		},
@@ -339,36 +287,49 @@ func Registry() []Tool {
 			},
 		},
 
-		// ── Privacy ─────────────────────────────────────────────────────────────────
+		// ── Runtimes & SDKs ─────────────────────────────────────────────────────────
 		{
-			Name:             "Do Not Track",
-			Description:      "Cross-tool environment variable convention for disabling telemetry and tracking",
-			DocumentationURL: "https://donottrack.sh",
-			DataCollection:   "Signals a global preference to disable telemetry, analytics, crash reporting, and non-essential tracking.",
-			Binary:           "",
-			Category:         "Privacy",
+			Name:             ".NET SDK",
+			Description:      "Microsoft .NET SDK and CLI",
+			DocumentationURL: "https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry",
+			DataCollection:   "CLI command usage, SDK versions, and exception metadata.",
+			Binary:           "dotnet",
+			Category:         "Runtimes & SDKs",
 			EnvChecks: []EnvCheck{
 				{
-					Name:        "DO_NOT_TRACK",
+					Name:        "DOTNET_CLI_TELEMETRY_OPTOUT",
 					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Signals a global do-not-track preference to tools that honor it",
+					Description: "Disables .NET CLI telemetry collection",
 				},
 			},
 		},
-
-		// ── Runtime ─────────────────────────────────────────────────────────────────
 		{
 			Name:             "Bun",
 			Description:      "Fast all-in-one JavaScript runtime and toolkit",
 			DocumentationURL: "https://bun.sh/docs/runtime/bunfig#telemetry",
 			DataCollection:   "Anonymous telemetry and crash-reporting signals from Bun tooling.",
 			Binary:           "bun",
-			Category:         "Runtime",
+			Category:         "Runtimes & SDKs",
 			EnvChecks: []EnvCheck{
 				{
-					Name:        "BUN_TELEMETRY_DISABLED",
+					Name:        "DO_NOT_TRACK",
 					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Bun telemetry",
+					Description: "Disables Bun telemetry via the global do-not-track convention",
+				},
+			},
+		},
+		{
+			Name:             "Flutter",
+			Description:      "Google's UI toolkit for cross-platform apps",
+			DocumentationURL: "https://docs.flutter.dev/reference/crash-reporting",
+			DataCollection:   "CLI crash reports, tool usage signals, and local environment metadata.",
+			Binary:           "flutter",
+			Category:         "Runtimes & SDKs",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "FLUTTER_CLI_CRASH_REPORTING",
+					ValidValues: []string{"false", "False", "FALSE", "0"},
+					Description: "Disables Flutter CLI crash reporting",
 				},
 			},
 		},
@@ -378,7 +339,7 @@ func Registry() []Tool {
 			DocumentationURL: "https://nodejs.org/api/cli.html#node_no_telemetry1",
 			DataCollection:   "Anonymous runtime and CLI telemetry in Node features that support it.",
 			Binary:           "node",
-			Category:         "Runtime",
+			Category:         "Runtimes & SDKs",
 			EnvChecks: []EnvCheck{
 				{
 					Name:        "DISABLE_TELEMETRY",
@@ -393,51 +354,34 @@ func Registry() []Tool {
 			},
 		},
 
-		// ── SDK ─────────────────────────────────────────────────────────────────────
-		{
-			Name:             ".NET SDK",
-			Description:      "Microsoft .NET SDK and CLI",
-			DocumentationURL: "https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry",
-			DataCollection:   "CLI command usage, SDK versions, and exception metadata.",
-			Binary:           "dotnet",
-			Category:         "SDK",
-			EnvChecks: []EnvCheck{
-				{
-					Name:        "DOTNET_CLI_TELEMETRY_OPTOUT",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables .NET CLI telemetry collection",
-				},
-			},
-		},
-		{
-			Name:             "Flutter",
-			Description:      "Google's UI toolkit for cross-platform apps",
-			DocumentationURL: "https://docs.flutter.dev/reference/crash-reporting",
-			DataCollection:   "CLI crash reports, tool usage signals, and local environment metadata.",
-			Binary:           "flutter",
-			Category:         "SDK",
-			EnvChecks: []EnvCheck{
-				{
-					Name:        "FLUTTER_CLI_CRASH_REPORTING",
-					ValidValues: []string{"false", "False", "FALSE", "0"},
-					Description: "Disables Flutter CLI crash reporting",
-				},
-			},
-		},
-
-		// ── Security ────────────────────────────────────────────────────────────────
+		// ── Security & Observability ───────────────────────────────────────────────
 		{
 			Name:             "Semgrep",
 			Description:      "Static analysis and code security scanning CLI",
 			DocumentationURL: "https://semgrep.dev/docs/metrics",
 			DataCollection:   "Usage metrics about Semgrep runs, registry usage, and login-related activity.",
 			Binary:           "semgrep",
-			Category:         "Security",
+			Category:         "Security & Observability",
 			EnvChecks: []EnvCheck{
 				{
 					Name:        "SEMGREP_SEND_METRICS",
 					ValidValues: []string{"off"},
 					Description: "Disables Semgrep metrics reporting",
+				},
+			},
+		},
+		{
+			Name:             "Sentry CLI",
+			Description:      "Sentry error tracking command-line tool",
+			DocumentationURL: "https://cli.sentry.dev/configuration/",
+			DataCollection:   "Anonymous CLI usage and diagnostic telemetry.",
+			Binary:           "sentry-cli",
+			Category:         "Security & Observability",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "SENTRY_CLI_NO_TELEMETRY",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Sentry CLI telemetry",
 				},
 			},
 		},

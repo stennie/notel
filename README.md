@@ -76,93 +76,61 @@ When `--fix` is combined with `--all` and/or `--verbose`, the audit report is st
   ✗  2/3  installed tools have telemetry disabled  (1 need attention)
 ```
 
-## Supported Tools
+## Supported Tools by Category
 
-### Build
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [Nx](https://nx.dev/telemetry) | `NX_TELEMETRY_DISABLED` | `1` | Anonymous command usage, workspace metadata, and machine characteristics. |
-| [Turborepo](https://turborepo.com/docs/telemetry) | `TURBO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, host information, and repo or task metrics. |
-
-### Cloud
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [Algolia CLI](https://www.algolia.com/doc/tools/cli/telemetry) | `ALGOLIA_CLI_TELEMETRY` | `0` | Command usage, operating system details, CLI version, and local profile metadata. |
-| [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration?view=azure-cli-latest) | `AZURE_CORE_COLLECT_TELEMETRY` | `0` | Command usage, performance metrics, and error-rate telemetry. |
-| [Google Cloud SDK](https://cloud.google.com/sdk/docs/usage-statistics) | `CLOUDSDK_CORE_DISABLE_USAGE_REPORTING` | `true` | Anonymized command execution metrics, timing, and error status. |
-
-### Database
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [CockroachDB](https://www.cockroachlabs.com/docs/stable/diagnostics-reporting) | `COCKROACH_SKIP_ENABLING_DIAGNOSTIC_REPORTING` | `true` | Cluster diagnostics, telemetry, and crash reports sent to Cockroach Labs. |
-
-### Deployment
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [Netlify CLI](https://docs.netlify.com/cli/get-started/#usage-data) | `NETLIFY_TELEMETRY_DISABLED` | `1` | Anonymous CLI usage and diagnostic telemetry. |
-
-### Framework
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [Angular CLI](https://angular.dev/cli/analytics) | `NG_CLI_ANALYTICS` | `false` or `ci` | Command usage, selected flags, workspace shape, and local version metadata. |
-| [Expo CLI](https://docs.expo.dev/workflow/expo-cli/) | `EXPO_NO_TELEMETRY` | `1` | Anonymous CLI usage and diagnostics for Expo development workflows. |
-| [Astro](https://docs.astro.build/en/reference/cli-reference/#astro-telemetry) | `ASTRO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, integration usage, and project metadata. |
-| [Gatsby](https://www.gatsbyjs.com/docs/telemetry/) | `GATSBY_TELEMETRY_DISABLED` | `1` | Anonymous command usage, plugin usage, and machine characteristics. |
-| [Next.js](https://nextjs.org/telemetry) | `NEXT_TELEMETRY_DISABLED` | `1` | Anonymous command usage, session timing, and project or machine characteristics. |
-| [Nuxt](https://github.com/nuxt/telemetry) | `NUXT_TELEMETRY_DISABLED` | `1` | Anonymous command usage, module usage, and environment characteristics. |
-| [Storybook](https://storybook.js.org/docs/configure/telemetry) | `STORYBOOK_DISABLE_TELEMETRY` | `1` | Anonymous framework usage, addon data, and environment metadata. |
-
-### Infrastructure
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [Pulumi](https://www.pulumi.com/docs/using-pulumi/telemetry/#disabling-telemetry) | `PULUMI_DISABLE_TELEMETRY` | `1` | Anonymous CLI command usage, stack events, and diagnostic telemetry. |
-| [Terraform](https://developer.hashicorp.com/terraform/cli/config/environment-variables#checkpoint_disable) | `CHECKPOINT_DISABLE` | `1` | Checkpoint version checks and security bulletin or alert lookups. |
-
-### Monitoring
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [Sentry CLI](https://cli.sentry.dev/configuration/) | `SENTRY_CLI_NO_TELEMETRY` | `1` | Anonymous CLI usage and diagnostic telemetry. |
-
-### Package Manager
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [Homebrew](https://docs.brew.sh/Analytics) | `HOMEBREW_NO_ANALYTICS` | `1` | Anonymous install events, command usage, and build error metadata. |
-| [Poetry](https://python-poetry.org/docs/configuration/#using-environment-variables) | `POETRY_TELEMETRY_ENABLED` | `0` | Anonymous usage statistics and telemetry about Poetry command execution. |
-| [Yarn (v2+)](https://yarnpkg.com/advanced/telemetry) | `YARN_ENABLE_TELEMETRY` | `0` | Anonymous command usage and version information. |
-
-### Privacy
+### All The Things
 
 | Tool | Environment Variable | Opt-out Value | Data Collection |
 |------|---------------------|---------------|-----------------|
 | [Do Not Track](https://donottrack.sh) | `DO_NOT_TRACK` | `1` | Signals a global preference to disable telemetry, analytics, crash reporting, and non-essential tracking. |
 
-### Runtime
+### Cloud & Deployment
 
 | Tool | Environment Variable | Opt-out Value | Data Collection |
 |------|---------------------|---------------|-----------------|
-| [Bun](https://bun.sh/docs/runtime/bunfig#telemetry) | `BUN_TELEMETRY_DISABLED` | `1` | Anonymous telemetry and crash-reporting signals from Bun tooling. |
+| [Algolia CLI](https://www.algolia.com/doc/tools/cli/telemetry) | `ALGOLIA_CLI_TELEMETRY` | `0` | Command usage, operating system details, CLI version, and local profile metadata. |
+| [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/azure-cli-configuration?view=azure-cli-latest#cli-configuration-values-and-environment-variables) | `AZURE_CORE_COLLECT_TELEMETRY` | `0` | Command usage, performance metrics, and error-rate telemetry.<p><p>`az config set core.collect_telemetry=no`|
+| [CockroachDB](https://www.cockroachlabs.com/docs/stable/telemetry) | `COCKROACH_SKIP_ENABLING`<br/>`_DIAGNOSTIC_REPORTING` | `true` | Cluster diagnostics, telemetry, and crash reports sent to Cockroach Labs.<p><p>NOTE: The environment variable only has effect if be set before initialising the first node of the cluster. After a cluster is running update the  [`diagnostics.reporting.enabled`](https://www.cockroachlabs.com/docs/stable/diagnostics-reporting#at-cluster-initialization) setting. Telemetry is required during the 30 day self-service Enterprise Trial (see: [Licensing FAQs](https://www.cockroachlabs.com/docs/stable/licensing-faqs)).|
+| [Google Cloud SDK](https://cloud.google.com/sdk/docs/usage-statistics) | `CLOUDSDK_CORE_DISABLE`<br/>`_USAGE_REPORTING` | `true` | Anonymized command execution metrics, timing, and error status.<p><p> NOTE: Unless you opt-in during Google Cloud CLI installation, gcloud CLI software does not collect usage statistics.<p><p>`gcloud config set disable_usage_reporting` `true|false`|
+| [Netlify CLI](https://docs.netlify.com/api-and-cli-guides/cli-guides/get-started-with-cli/#usage-data-collection) | `NETLIFY_TELEMETRY_DISABLED` | `1` | Anonymous CLI usage and diagnostic telemetry. <p><p>`netlify --telemetry-disable`<p><p>`netlify --telemetry-enable`
+| [Turborepo](https://turborepo.com/docs/telemetry) | `TURBO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, host information, and repo or task metrics. <p><p>`turbo telemetry disable`<p><p>`turbo telemetry enable`<p><p>`turbo telemetry status`|
+
+
+### Framework
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Angular CLI](https://angular.dev/cli/analytics) | `NG_CLI_ANALYTICS` | `false` or `ci` | Command usage, selected flags, workspace shape, and local version metadata.<p><p>`ng analytics [disable|enable|info|prompt]` |
+| [Astro](https://docs.astro.build/en/reference/cli-reference/#astro-telemetry) | `ASTRO_TELEMETRY_DISABLED` | `1` | Anonymous command usage, integration usage, and project metadata. <p><p>`astro telemetry disable`<p><p>`astro telemetry enable`|
+| [Expo CLI](https://docs.expo.dev/more/expo-cli/#telemetry) | `EXPO_NO_TELEMETRY` | `1` | Anonymous CLI usage and diagnostics for Expo development workflows. |
+| [Gatsby](https://www.gatsbyjs.com/docs/telemetry/) | `GATSBY_TELEMETRY_DISABLED` | `1` | Anonymous command usage, plugin usage, and machine characteristics. <p><p>`gatsby telemetry --disable`|
+| [Next.js](https://nextjs.org/telemetry) | `NEXT_TELEMETRY_DISABLED` | `1` | Anonymous command usage, session timing, and project or machine characteristics. <p><p>`npx @nuxt/telemetry [status|enable|disable]`<br/>`[-g,--global] [dir]`|
+| [Nuxt](https://github.com/nuxt/telemetry#nuxt-telemetry-module) | `NUXT_TELEMETRY_DISABLED` | `1` | Anonymous command usage, module usage, and environment characteristics. |
+| [Storybook](https://storybook.js.org/docs/configure/telemetry) | `STORYBOOK_DISABLE_TELEMETRY` | `true` | Anonymous framework usage, addon data, and environment metadata.<p><p>`npm run storybook -- --disable-telemetry` |
+
+### Package Manager
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Homebrew](https://docs.brew.sh/Analytics) | `HOMEBREW_NO_ANALYTICS` | `1` | Anonymous install events, command usage, and build error metadata.<p><p> `brew analytics state`<p><p>`brew analytics off`<p><p>`brew analytics on`|
+| [Poetry](https://python-poetry.org/docs/configuration/#using-environment-variables) | `POETRY_TELEMETRY_ENABLED` | `0` | Anonymous usage statistics and telemetry about Poetry command execution. |
+| [Yarn (v2+)](https://yarnpkg.com/advanced/telemetry) | `YARN_ENABLE_TELEMETRY` | `0` | Anonymous command usage and version information. |
+
+### Runtimes & SDKs
+
+| Tool | Environment Variable | Opt-out Value | Data Collection |
+|------|---------------------|---------------|-----------------|
+| [Bun](https://bun.sh/docs/runtime/bunfig#telemetry) | `DO_NOT_TRACK` | `1` | Anonymous telemetry and crash-reporting signals from Bun tooling. |
+| [.NET SDK](https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry) | `DOTNET_CLI_TELEMETRY_OPTOUT` | `1` | CLI command usage, SDK versions, and exception metadata. |
+| [Flutter](https://docs.flutter.dev/reference/crash-reporting) | `FLUTTER_CLI_CRASH_REPORTING` | `false` | CLI crash reports, tool usage signals, and local environment metadata.<p><p><p><p>Note: ⁠FLUTTER_CLI_CRASH_REPORTING does not disable the general analytics reporting setting which must be set via the CLI: <p><p>`flutter config --no-analytics`|
 | [Node.js](https://nodejs.org/api/cli.html#node_no_telemetry1) | `DISABLE_TELEMETRY` / `NODE_NO_TELEMETRY` | `1` | Anonymous runtime and CLI telemetry in Node features that support it. |
 
-### SDK
+### Security & Observability
 
 | Tool | Environment Variable | Opt-out Value | Data Collection |
 |------|---------------------|---------------|-----------------|
-| [.NET SDK](https://learn.microsoft.com/en-us/dotnet/core/tools/telemetry) | `DOTNET_CLI_TELEMETRY_OPTOUT` | `1` | CLI command usage, SDK versions, and exception metadata. |
-| [Flutter](https://docs.flutter.dev/reference/crash-reporting) | `FLUTTER_CLI_CRASH_REPORTING` | `false` | CLI crash reports, tool usage signals, and local environment metadata. |
-
-### Security
-
-| Tool | Environment Variable | Opt-out Value | Data Collection |
-|------|---------------------|---------------|-----------------|
-| [Semgrep](https://semgrep.dev/docs/metrics) | `SEMGREP_SEND_METRICS` | `off` | Usage metrics about Semgrep runs, registry usage, and login-related activity. |
+| [Semgrep](https://semgrep.dev/docs/metrics) | `SEMGREP_SEND_METRICS` | `off` | Usage metrics about Semgrep runs, registry usage, and login-related activity. <p><p>`semgrep --metrics auto|on|off ...`|
+| [Sentry CLI](https://cli.sentry.dev/configuration/) | `SENTRY_CLI_NO_TELEMETRY` | `1` | Anonymous CLI usage and diagnostic telemetry. |
 
 ## Adding a new tool
 
