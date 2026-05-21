@@ -72,6 +72,21 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:             "Cloudflare Wrangler CLI",
+			Description:      "Cloudflare CLI for building and deploying Workers and Pages applications",
+			DocumentationURL: "https://github.com/cloudflare/workers-sdk/blob/main/packages/wrangler/telemetry.md#wrangler-cli-telemetry",
+			DataCollection:   "Command names, anonymized arguments and flags, anonymized project metadata, API timing, CLI and runtime details, session duration, CI or interactive usage, AI agent usage, sanitized error details, and general machine information.",
+			Binary:           "wrangler",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "WRANGLER_SEND_METRICS",
+					ValidValues: []string{"false", "False", "FALSE"},
+					Description: "Disables Cloudflare Wrangler CLI telemetry",
+				},
+			},
+		},
+		{
 			Name:             "CockroachDB",
 			Description:      "Distributed SQL database and CockroachDB command-line tools",
 			DocumentationURL: "https://www.cockroachlabs.com/docs/stable/telemetry",
@@ -121,6 +136,21 @@ func Registry() []Tool {
 				},
 			},
 		},
+		{
+			Name:             "Hasura CLI",
+			Description:      "Hasura command-line interface for managing GraphQL Engine projects",
+			DocumentationURL: "https://hasura.io/docs/2.0/policies/telemetry/#cli",
+			DataCollection:   "Command name, timestamp, error status, server version and UUID, operating system platform and architecture, and CLI version.",
+			Binary:           "hasura",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "HASURA_GRAPHQL_ENABLE_TELEMETRY",
+					ValidValues: []string{"false", "False", "FALSE"},
+					Description: "Disables Hasura CLI telemetry",
+				},
+			},
+		},
 
 		{
 			Name:             "Netlify CLI",
@@ -138,6 +168,56 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:             "Railway CLI",
+			Description:      "Railway command-line interface for deploying and managing projects",
+			DocumentationURL: "https://docs.railway.com/cli/telemetry",
+			DataCollection:   "Command and subcommand names, duration, success, truncated error message, OS, architecture, CLI version, and whether the command ran in CI.",
+			Binary:           "railway",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "DO_NOT_TRACK",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Railway CLI telemetry via the global do-not-track convention",
+				},
+				{
+					Name:        "RAILWAY_NO_TELEMETRY",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Railway CLI telemetry",
+				},
+			},
+		},
+		{
+			Name:             "Redocly CLI",
+			Description:      "Redocly command-line interface for API governance and documentation workflows",
+			DocumentationURL: "https://redocly.com/docs/realm/reunite/project/telemetry",
+			DataCollection:   "Anonymous usage information about Redocly project feature usage, with additional filtering to avoid sending secrets and other sensitive data.",
+			Binary:           "redocly",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "REDOCLY_TELEMETRY",
+					ValidValues: []string{"off", "OFF", "Off"},
+					Description: "Disables Redocly CLI telemetry",
+				},
+			},
+		},
+		{
+			Name:             "Stripe CLI",
+			Description:      "Stripe command-line interface for developer workflows and API interactions",
+			DocumentationURL: "https://docs.stripe.com/cli/telemetry",
+			DataCollection:   "Command usage patterns, error rates and types, performance metrics, operating system details, CLI version information, and detected AI coding agent names.",
+			Binary:           "stripe",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "STRIPE_CLI_TELEMETRY_OPTOUT",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Stripe CLI telemetry",
+				},
+			},
+		},
+		{
 			Name:             "Turborepo",
 			Description:      "High-performance build system for JavaScript/TypeScript",
 			DocumentationURL: "https://turborepo.com/docs/telemetry",
@@ -149,6 +229,21 @@ func Registry() []Tool {
 					Name:        "TURBO_TELEMETRY_DISABLED",
 					ValidValues: []string{"1", "true", "True", "TRUE"},
 					Description: "Disables Turborepo telemetry",
+				},
+			},
+		},
+		{
+			Name:             "Vercel CLI",
+			Description:      "Frontend cloud platform CLI for deployment and project management",
+			DocumentationURL: "https://vercel.com/docs/cli/about-telemetry",
+			DataCollection:   "Command usage, arguments, CLI version, and general machine information.",
+			Binary:           "vercel",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "VERCEL_TELEMETRY_DISABLED",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Vercel CLI telemetry",
 				},
 			},
 		},
@@ -261,6 +356,21 @@ func Registry() []Tool {
 		},
 
 		// ── Package Manager ─────────────────────────────────────────────────────────
+		{
+			Name:             "CocoaPods",
+			Description:      "Dependency manager for Swift and Objective-C projects",
+			DocumentationURL: "https://blog.cocoapods.org/Stats/",
+			DataCollection:   "Anonymous pod install statistics, including hashed project target identifiers, target product types, pod names, and CocoaPods version information.",
+			Binary:           "pod",
+			Category:         "Package Manager",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "COCOAPODS_DISABLE_STATS",
+					ValidValues: []string{"true", "True", "TRUE", "1"},
+					Description: "Disables CocoaPods stats collection",
+				},
+			},
+		},
 		{
 			Name:             "Homebrew",
 			Description:      "The missing package manager for macOS",
