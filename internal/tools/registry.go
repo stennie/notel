@@ -87,6 +87,26 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:             "GitHub CLI",
+			Description:      "Official command-line tool for GitHub",
+			DocumentationURL: "https://docs.github.com/en/github-cli/github-cli/github-cli-telemetry",
+			DataCollection:   "Command usage, feature usage, and diagnostic telemetry from the GitHub CLI.",
+			Binary:           "gh",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "GH_TELEMETRY",
+					ValidValues: []string{"false", "False", "FALSE"},
+					Description: "Disables GitHub CLI telemetry",
+				},
+				{
+					Name:        "DO_NOT_TRACK",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables GitHub CLI telemetry via the global do-not-track convention",
+				},
+			},
+		},
+		{
 			Name:             "Google Cloud SDK",
 			Description:      "Google Cloud command-line tools",
 			DocumentationURL: "https://cloud.google.com/sdk/docs/usage-statistics",
