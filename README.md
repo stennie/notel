@@ -52,11 +52,20 @@ However, this hasn't been widely adopted yet.
 Some interesting open source projects I found on GitHub after scratching my own
 itch to audit telemetry tools in my environments:
 
- - [`alloydwhitlock/do-not-track-cli`](https://github.com/alloydwhitlock/do-not-track-cli) - A single `.env` file to opt out of telemetry across CLI tools, frameworks, SDKs, and runtimes.
- - [`beatcracker/toptout`](https://github.com/beatcracker/toptout`) - This
+ - [`alloydwhitlock/do-not-track-cli`](https://github.com/alloydwhitlock/do-not-track-cli):
+   A single `.env` file to opt out of telemetry across CLI tools, frameworks,
+   SDKs, and runtimes.
+ - [`beatcracker/toptout`](https://github.com/beatcracker/toptout`): This
    project collects data about telemetry in applications in machine-readable
    format and makes it easy to create derivative works such as awesome-lists,
    configuration scripts, APIs, etc.
+
+### Related discussions
+
+ - [Hacker News (3 May 2026): donottrack.sh](https://news.ycombinator.com/item?id=47988592)
+ - [Go Telemetry (v1.23+)](https://go.dev/doc/telemetry): By default, telemetry data is
+   kept only on the local computer, but users may opt in to uploading an
+   approved subset of telemetry data to telemetry.go.dev.
 
 ## Requirements
 
