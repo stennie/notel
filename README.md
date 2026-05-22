@@ -74,6 +74,32 @@ itch to audit telemetry tools in my environments:
 - [Lipgloss](https://github.com/charmbracelet/lipgloss) — terminal styling
 - [Just](https://github.com/casey/just) — Task runner
 
+## Install
+
+Install from the Homebrew tap:
+
+```sh
+brew install stennie/notel/notel
+```
+
+Or tap the repository first and then install `notel`:
+
+```sh
+brew tap stennie/notel
+brew install notel
+```
+
+If you manage tools with a Brewfile:
+
+```ruby
+tap "stennie/notel"
+brew "notel"
+```
+
+The Homebrew formula lives in
+[`stennie/homebrew-notel`](https://github.com/stennie/homebrew-notel) and
+installs release artifacts published from this repository.
+
 ## Build
 
 - Local build: `just build` -> `bin/notel`
