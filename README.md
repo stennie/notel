@@ -83,8 +83,8 @@ itch to audit telemetry tools in my environments:
 ## Requirements
 
 - Go 1.26.3+
-- [Cobra](https://github.com/spf13/cobra) — CLI framework
-- [Lipgloss](https://github.com/charmbracelet/lipgloss) — terminal styling
+  - [Cobra](https://github.com/spf13/cobra) — CLI framework
+  - [Lipgloss](https://github.com/charmbracelet/lipgloss) — terminal styling
 - [Just](https://github.com/casey/just) — Task runner
 
 ## Install
