@@ -1,19 +1,21 @@
 # notel
 
-**notel** audits telemetry opt-out settings across common developer tools.
+`notel` helps you audit and update telemetry settings across your CLI dev tools.
 
-Telemetry collection is a privacy concern for many developers, especially where
-collection of data may not be obvious without consulting the documentation.
-Historically every tool has tended to choose unique environment variables or
-configuration settings which makes it difficult to opt-out by default.
+Many popular developer tools collect telemetry by default. This can have
+benefits for both end users and vendors, but can also be a legitimate
+privacy concern. I've found it frustrating to have to individually configure
+each tool to disable telemetry and keep track of which ones have telemetry
+enabled by default, so I built this tool to:
 
-This tool helps identify and opt-out of telemetry for popular developer tools.
-The MVP version checks whether CLI tools are installed and if environment
-variables that disable telemetry collection are correctly set. This does not
-yet support other forms of telemetry settings such as config files, although
-there are some hints for command-line equivalents in the notes below on
-supported tools.
+ - Audit which installed dev tool CLIs have telemetry enabled
+ - Check if you've set the right opt-out environment variables
+ - Suggest the exact commands to disable telemetry (export env vars for
+   shells or relevant CLI commands)
 
+The initial design goal focuses on environment variable configuration to
+keep the scope maintainable. `notel` does not make any changes to your
+environment or run any CLI commands.
 
 ## Overview
 
