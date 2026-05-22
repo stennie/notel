@@ -6,6 +6,7 @@
 - [Requirements](#requirements)
 - [Install](#install)
 - [Usage](#usage)
+- [Example Output](#example-output)
 - [Supported Tools by Category](#supported-tools-by-category)
 - [Build](#build)
 - [Feedback or Suggestions](#feedback-or-suggestions)
@@ -127,7 +128,7 @@ notel [command]
 | `notel audit --all` | Show status for all tools (including those not installed) |
 | `notel audit --verbose` | Detailed audit with fix hints for all **installed** tools |
 | `notel audit --verbose --all` | Detailed audit for all tools (including those not installed) |
-| `notel audit --fix` / `notel audit -f` | Print shell commands to disable telemetry for the current detected shell |
+| `notel audit --fix` / `notel audit -f` | Print shell commands (using `stdout`) to disable telemetry for the current detected shell. Diagnostic messages and errors use `stderr` so the output is cleanly redirectable.|
 | `notel audit --fix=zsh` / `notel audit -f=zsh` | Print shell commands for a specific shell (`bash`, `fish`, `powershell`, `zsh`) |
 | `notel list` / `notel ls` | List all supported tools and their opt-out variables |
 | `notel version` / `notel --version` | Show the application version |
@@ -136,23 +137,27 @@ notel [command]
 When `--fix` is combined with `--all` and/or `--verbose`, the audit report is
 still shown on `stderr` and the shell commands remain redirect-safe on `stdout`.
 
-### Example output
+### Example Output
 
-```
-  notel  —  DevTools Telemetry Auditor
-  ────────────────────────────────────────────────────────────
+<table>
+  <tr>
+    <th>Command</th>
+    <th>Screenshot</th>
+  </tr>
+  <tr>
+    <td><code>notel audit</code></td>
+    <td><img src="screenshots/notel-audit.png" alt="Screenshot: notel audit" width="500"></td>
+  </tr>
+  <tr>
+    <td><code>notel audit --fix</code></td>
+    <td><img src="screenshots/notel-audit-fix.png" alt="Screenshot: notel audit" width="500"></td>
+  </tr>
+  <tr>
+    <td><code>notel audit --verbose</code></td>
+    <td><img src="screenshots/notel-audit-verbose.png" alt="Screenshot: notel audit" width="500"></td>
+  </tr>
+</table>
 
-  Package Manager
-  ✓  Homebrew              HOMEBREW_NO_ANALYTICS=1
-  ✗  Yarn                  YARN_ENABLE_TELEMETRY (not set)
-
-  Runtime
-  ✓  Node.js               NODE_NO_TELEMETRY=1
-
-  ...
-
-  ✗  2/3  installed tools have telemetry disabled  (1 need attention)
-```
 
 ## Supported Tools by Category
 
@@ -261,7 +266,7 @@ Add an entry to `internal/tools/registry.go`:
 
 Keep registry entries sorted alphabetically by `Category` and then by `Name`.
 
-## Project structure
+## Project Structure
 
 ```
 notel/
@@ -282,6 +287,6 @@ notel/
 ## License
 Licensed under the Apache License, Version 2.0. See `LICENSE`.
 
-## Feedback or suggestions?
+## Feedback or Suggestions?
 
 Bug reports, feature requests, and questions can be posted in the [Issues](https://github.com/stennie/notel/issues) section on GitHub.
