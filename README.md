@@ -14,6 +14,18 @@ yet support other forms of telemetry settings such as config files, although
 there are some hints for command-line equivalents in the notes below on
 supported tools.
 
+
+## Overview
+
+- [Overview](#motivation)
+- [Requirements](#requirements)
+- [Install](#install)
+- [Usage](#usage)
+- [Supported Tools by Category](#supported-tools-by-category)
+- [Build](#build)
+- [Feedback or Suggestions](#feedback-or-suggestions)
+
+
 ### Why disable telemetry?
 
 - Disabling telemetry exercises your rights to privacy and control over your
@@ -37,7 +49,7 @@ supported tools.
 ### DO_NOT_TRACK
 
 There is a proposed [`DO_NOT_TRACK`](https://donottrack.sh/) standard which
-aims to unambiguously express a user's intent  to opt out of:
+aims to unambiguously express a user's intent to opt out of:
 
  - Ad tracking
  - Usage reporting (anonymous or otherwise)
@@ -99,25 +111,6 @@ brew "notel"
 The Homebrew formula lives in
 [`stennie/homebrew-notel`](https://github.com/stennie/homebrew-notel) and
 installs release artifacts published from this repository.
-
-## Build
-
-- Local build: `just build` -> `bin/notel`
-- Cross-platform release artifacts: `just release` -> `dist/`
-- Full release preflight plus artifacts: `just release-check`
-- Release packaging is shared by local and CI builds via `scripts/release.sh`
-
-`just release` builds archives for:
-
-- `darwin/amd64`
-- `darwin/arm64`
-- `linux/amd64`
-- `linux/arm64`
-- `windows/amd64`
-- `windows/arm64`
-
-Release artifacts follow the convention `notel_<version>_<os>_<arch>.tar.gz`
-or `.zip`, and `dist/SHA256SUMS` is generated for the packaged archives.
 
 ## Usage
 
@@ -223,6 +216,25 @@ still shown on `stderr` and the shell commands remain redirect-safe on `stdout`.
 |------|---------------------|---------------|-----------------|
 | [Semgrep](https://semgrep.dev/docs/metrics) | `SEMGREP_SEND_METRICS` | `off` | Usage metrics about Semgrep runs, registry usage, and login-related activity. <p><p>`semgrep --metrics auto|on|off ...`|
 | [Sentry CLI](https://cli.sentry.dev/configuration/) | `SENTRY_CLI_NO_TELEMETRY` | `1` | Anonymous CLI usage and diagnostic telemetry. |
+
+## Build
+
+- Local build: `just build` -> `bin/notel`
+- Cross-platform release artifacts: `just release` -> `dist/`
+- Full release preflight plus artifacts: `just release-check`
+- Release packaging is shared by local and CI builds via `scripts/release.sh`
+
+`just release` builds archives for:
+
+- `darwin/amd64`
+- `darwin/arm64`
+- `linux/amd64`
+- `linux/arm64`
+- `windows/amd64`
+- `windows/arm64`
+
+Release artifacts follow the convention `notel_<version>_<os>_<arch>.tar.gz`
+or `.zip`, and `dist/SHA256SUMS` is generated for the packaged archives.
 
 ## Adding a new tool
 
