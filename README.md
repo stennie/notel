@@ -2,6 +2,16 @@
 
 `notel` helps you audit and update telemetry settings across your CLI dev tools.
 
+- [Overview](#overview)
+- [Requirements](#requirements)
+- [Install](#install)
+- [Usage](#usage)
+- [Supported Tools by Category](#supported-tools-by-category)
+- [Build](#build)
+- [Feedback or Suggestions](#feedback-or-suggestions)
+
+### Overview
+
 Many popular developer tools collect telemetry by default. This can have
 benefits for both end users and vendors, but can also be a legitimate
 privacy concern. I've found it frustrating to have to individually configure
@@ -16,17 +26,6 @@ enabled by default, so I built this tool to:
 The initial design goal focuses on environment variable configuration to
 keep the scope maintainable. `notel` does not make any changes to your
 environment or run any CLI commands.
-
-## Overview
-
-- [Overview](#overview)
-- [Requirements](#requirements)
-- [Install](#install)
-- [Usage](#usage)
-- [Supported Tools by Category](#supported-tools-by-category)
-- [Build](#build)
-- [Feedback or Suggestions](#feedback-or-suggestions)
-
 
 ### Why disable telemetry?
 
