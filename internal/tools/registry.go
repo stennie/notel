@@ -151,6 +151,26 @@ func Registry() []Tool {
 				},
 			},
 		},
+		{
+			Name:             "Hugging Face CLI",
+			Description:      "Hugging Face command-line interface for interacting with the Hub",
+			DocumentationURL: "https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfhubdisabletelemetry",
+			DataCollection:   "Usage data collected by Hugging Face libraries to monitor usage, debug issues, and help prioritize features.",
+			Binary:           "hf",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "DO_NOT_TRACK",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Hugging Face telemetry via the global do-not-track convention",
+				},
+				{
+					Name:        "HF_HUB_DISABLE_TELEMETRY",
+					ValidValues: []string{"1", "true", "True", "TRUE"},
+					Description: "Disables Hugging Face telemetry",
+				},
+			},
+		},
 
 		{
 			Name:             "Netlify CLI",
