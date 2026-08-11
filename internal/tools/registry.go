@@ -102,6 +102,21 @@ func Registry() []Tool {
 			},
 		},
 		{
+			Name:             "Docker Agent",
+			Description:      "Docker CLI agent for running AI agents from Docker",
+			DocumentationURL: "https://docs.docker.com/ai/docker-agent/community/telemetry/",
+			DataCollection:   "Command names, agent and model types, tool-call outcomes, token counts, estimated costs, and session metadata.",
+			Binary:           "docker",
+			Category:         "Cloud & Deployment",
+			EnvChecks: []EnvCheck{
+				{
+					Name:        "TELEMETRY_ENABLED",
+					ValidValues: []string{"false", "False", "FALSE"},
+					Description: "Disables Docker Agent telemetry",
+				},
+			},
+		},
+		{
 			Name:             "GitHub CLI",
 			Description:      "Official command-line tool for GitHub",
 			DocumentationURL: "https://docs.github.com/en/github-cli/github-cli/github-cli-telemetry",
