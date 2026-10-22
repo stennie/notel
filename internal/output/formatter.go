@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/stennie/notel/internal/check"
 	"github.com/stennie/notel/internal/fix"
+	"github.com/stennie/notel/internal/tools"
 )
 
 // ── Palette ─────────────────────────────────────────────────────────────────
@@ -277,16 +278,28 @@ func WriteListResults(w io.Writer, results []check.ToolResult) {
 			fmt.Fprintf(w, "    %s %s\n", faintStyle.Render("Data:"), hintStyle.Render(r.Tool.DataCollection))
 			fmt.Fprintf(w, "    %s %s\n", faintStyle.Render("Docs:"), hintStyle.Render(r.Tool.DocumentationURL))
 
+			if r.Tool.OptOut == tools.AnyOf {
+				fmt.Fprintf(w, "    %s\n", hintStyle.Render("Any one of these variables opts out."))
+			}
+			if r.Tool.Default == tools.DefaultDisabled {
+				fmt.Fprintf(w, "    %s\n", hintStyle.Render("Unset means already off. Collection is opt-in."))
+			}
 			for _, c := range r.Tool.EnvChecks {
 				validStr := strings.Join(c.ValidValues, " | ")
 				if validStr == "" {
 					validStr = "<any non-empty value>"
+				}
+				if c.IgnoreCase {
+					validStr += " (any case)"
 				}
 				fmt.Fprintf(w, "    %s %s\n",
 					envStyle.Render(c.Name),
 					faintStyle.Render("= "+validStr),
 				)
 				fmt.Fprintf(w, "    %s\n", hintStyle.Render(c.Description))
+			}
+			for _, command := range r.Tool.Commands {
+				fmt.Fprintf(w, "    %s %s\n", faintStyle.Render("CLI:"), hintStyle.Render(command))
 			}
 			fmt.Fprintln(w)
 		}
@@ -352,15 +365,29 @@ func writeCompactRow(w io.Writer, r check.ToolResult) {
 
 	var envParts []string
 	for _, c := range r.Checks {
-		if c.Passing {
+		switch {
+		case c.Reason == check.ReasonDefaultOff:
+			// Unset is a pass for opt-in tools. Keep it visually distinct from
+			// a variable the user explicitly set to an opt-out value.
+			envParts = append(envParts,
+				faintStyle.Render(c.Check.Name)+" "+hintStyle.Render("(not set; off unless you opt in)"),
+			)
+		case c.Passing:
 			envParts = append(envParts,
 				passingStyle.Render(c.Check.Name)+"="+valueStyle.Render(c.Value),
 			)
-		} else if c.Value == "" {
+		case r.Tool.OptOut == tools.AnyOf && r.AllPassing:
+			// Another alternative already satisfied the tool. Show this one as
+			// unused instead of as a failure, or the row would be green and red
+			// at the same time.
+			envParts = append(envParts,
+				faintStyle.Render(c.Check.Name)+" "+hintStyle.Render("(alternative opt-out, not required)"),
+			)
+		case c.Value == "":
 			envParts = append(envParts,
 				failingStyle.Render(c.Check.Name)+" "+faintStyle.Render("(not set)"),
 			)
-		} else {
+		default:
 			envParts = append(envParts,
 				failingStyle.Render(c.Check.Name+"="+c.Value)+" "+
 					hintStyle.Render("(unexpected value; assuming telemetry enabled)"),
@@ -392,34 +419,70 @@ func writeDetailedBlock(w io.Writer, r check.ToolResult) {
 		installed,
 	)
 	fmt.Fprintf(w, "       %s %s\n", faintStyle.Render("Docs:"), hintStyle.Render(r.Tool.DocumentationURL))
+	if r.Tool.OptOut == tools.AnyOf {
+		fmt.Fprintf(w, "       %s\n", hintStyle.Render("Any one of these variables opts out."))
+	}
 
 	if !r.Installed {
-		if !hasDetectedEnvValue(r.Checks) {
+		// Uninstalled tools stay quiet unless the environment already has a
+		// relevant value, or the entry has a CLI hint worth showing under --all.
+		if !hasDetectedEnvValue(r.Checks) && len(r.Tool.Commands) == 0 {
 			return
 		}
 		for _, c := range r.Checks {
-			if c.Value == "" {
+			if c.Value == "" && c.Reason != check.ReasonDefaultOff {
 				continue
 			}
-			fmt.Fprintln(w, detailedStatusLine(c))
+			fmt.Fprintln(w, detailedStatusLine(r, c))
 			fmt.Fprintf(w, "       %s\n", faintStyle.Render(c.Check.Description))
 		}
+		writeCommandHints(w, r.Tool)
 		return
 	}
 
 	for _, c := range r.Checks {
-		fmt.Fprintln(w, detailedStatusLine(c))
+		fmt.Fprintln(w, detailedStatusLine(r, c))
 		fmt.Fprintf(w, "       %s\n", faintStyle.Render(c.Check.Description))
+	}
+	writeCommandHints(w, r.Tool)
+}
+
+// writeCommandHints prints CLI remediations that notel does not verify.
+// They sit next to the env checks so a passing crash-reporting variable
+// cannot hide a Flutter analytics setting that has no environment variable.
+func writeCommandHints(w io.Writer, tool tools.Tool) {
+	for _, command := range tool.Commands {
+		fmt.Fprintf(w, "       %s %s\n",
+			hintStyle.Render("→ also (not verified):"),
+			hintStyle.Render(command),
+		)
 	}
 }
 
-func detailedStatusLine(c check.EnvCheckResult) string {
+func detailedStatusLine(r check.ToolResult, c check.EnvCheckResult) string {
 	validStr := strings.Join(c.Check.ValidValues, " or ")
+	if c.Check.IgnoreCase && validStr != "" {
+		validStr += " (any case)"
+	}
+	if c.Reason == check.ReasonDefaultOff {
+		return fmt.Sprintf("     %s  %s  %s",
+			passingStyle.Render("✓"),
+			envStyle.Render(c.Check.Name),
+			hintStyle.Render("not set; telemetry is off unless you opt in"),
+		)
+	}
 	if c.Passing {
 		return fmt.Sprintf("     %s  %s=%s",
 			passingStyle.Render("✓"),
 			envStyle.Render(c.Check.Name),
 			valueStyle.Render(c.Value),
+		)
+	}
+	if r.Tool.OptOut == tools.AnyOf && r.AllPassing {
+		return fmt.Sprintf("     %s  %s  %s",
+			skippedStyle.Render("–"),
+			envStyle.Render(c.Check.Name),
+			hintStyle.Render("alternative opt-out, not required"),
 		)
 	}
 	if c.Value == "" {

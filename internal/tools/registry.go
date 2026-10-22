@@ -1,26 +1,15 @@
-// Package tools defines the registry of developer tools that notel can audit.
 package tools
 
-// EnvCheck defines an environment variable requirement for a tool.
-type EnvCheck struct {
-	Name        string   // environment variable name
-	ValidValues []string // accepted values that mean "opt-out" (empty = any non-empty value)
-	Description string   // human-readable description of what this controls
-}
-
-// Tool represents a developer tool that can be audited for telemetry settings.
-type Tool struct {
-	Name             string
-	Description      string
-	DocumentationURL string
-	DataCollection   string
-	Binary           string // binary name to detect via PATH (empty = always consider installed)
-	Category         string
-	EnvChecks        []EnvCheck
-}
-
-// Registry returns the full list of developer tools notel can audit.
-// To add a new tool, append a new Tool entry here.
+// Registry returns the developer tools notel can audit.
+//
+// To add a tool, append one Tool in category order, then name order.
+// The zero values of Default and OptOut mean "telemetry is on until every
+// variable matches". Set those fields only when that sentence is false.
+// CaseInsensitive is for vendors that accept any capitalization. An exact
+// EnvCheck literal is for vendors that document one spelling.
+//
+// Commands are printed as hints. notel does not run them and does not treat
+// them as proof that telemetry is off.
 func Registry() []Tool {
 	return []Tool{
 		// ── All The Things ───────────────────────────────────────────────────────────
@@ -29,14 +18,14 @@ func Registry() []Tool {
 			Description:      "Cross-tool environment variable convention for disabling telemetry and tracking",
 			DocumentationURL: "https://donottrack.sh",
 			DataCollection:   "Signals a global preference to disable telemetry, analytics, crash reporting, and non-essential tracking.",
-			Binary:           "",
-			Category:         "All The Things",
+			// No binary. This entry is the convention itself, so it is always in scope.
+			Category: "All The Things",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "DO_NOT_TRACK",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Signals a global do-not-track preference to tools that honor it",
-				},
+				CaseInsensitive(
+					"DO_NOT_TRACK",
+					"Signals a global do-not-track preference to tools that honor it",
+					"1", "true",
+				),
 			},
 		},
 
@@ -64,12 +53,13 @@ func Registry() []Tool {
 			Binary:           "az",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "AZURE_CORE_COLLECT_TELEMETRY",
-					ValidValues: []string{"0", "false", "False", "FALSE"},
-					Description: "Disables Azure CLI telemetry collection",
-				},
+				CaseInsensitive(
+					"AZURE_CORE_COLLECT_TELEMETRY",
+					"Disables Azure CLI telemetry collection",
+					"0", "false",
+				),
 			},
+			Commands: []string{"az config set core.collect_telemetry=no"},
 		},
 		{
 			Name:             "Cloudflare Wrangler CLI",
@@ -79,12 +69,13 @@ func Registry() []Tool {
 			Binary:           "wrangler",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "WRANGLER_SEND_METRICS",
-					ValidValues: []string{"false", "False", "FALSE"},
-					Description: "Disables Cloudflare Wrangler CLI telemetry",
-				},
+				CaseInsensitive(
+					"WRANGLER_SEND_METRICS",
+					"Disables Cloudflare Wrangler CLI telemetry",
+					"false",
+				),
 			},
+			Commands: []string{"wrangler telemetry disable"},
 		},
 		{
 			Name:             "CockroachDB",
@@ -94,11 +85,11 @@ func Registry() []Tool {
 			Binary:           "cockroach",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "COCKROACH_SKIP_ENABLING_DIAGNOSTIC_REPORTING",
-					ValidValues: []string{"true", "True", "TRUE", "1"},
-					Description: "Disables CockroachDB diagnostic reporting for new clusters",
-				},
+				CaseInsensitive(
+					"COCKROACH_SKIP_ENABLING_DIAGNOSTIC_REPORTING",
+					"Disables CockroachDB diagnostic reporting when set before the first node of a cluster is initialised",
+					"true", "1",
+				),
 			},
 		},
 		{
@@ -109,11 +100,11 @@ func Registry() []Tool {
 			Binary:           "docker",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "TELEMETRY_ENABLED",
-					ValidValues: []string{"false", "False", "FALSE"},
-					Description: "Disables Docker Agent telemetry",
-				},
+				CaseInsensitive(
+					"TELEMETRY_ENABLED",
+					"Disables Docker Agent telemetry",
+					"false",
+				),
 			},
 		},
 		{
@@ -123,18 +114,22 @@ func Registry() []Tool {
 			DataCollection:   "Command usage, feature usage, and diagnostic telemetry from the GitHub CLI.",
 			Binary:           "gh",
 			Category:         "Cloud & Deployment",
+			// Either variable is a complete opt-out. Requiring both reported a
+			// failure on machines that had already set DO_NOT_TRACK=1.
+			OptOut: AnyOf,
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "GH_TELEMETRY",
-					ValidValues: []string{"false", "False", "FALSE"},
-					Description: "Disables GitHub CLI telemetry",
-				},
-				{
-					Name:        "DO_NOT_TRACK",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables GitHub CLI telemetry via the global do-not-track convention",
-				},
+				CaseInsensitive(
+					"GH_TELEMETRY",
+					"Disables GitHub CLI telemetry",
+					"false",
+				),
+				CaseInsensitive(
+					"DO_NOT_TRACK",
+					"Disables GitHub CLI telemetry via the global do-not-track convention",
+					"1", "true",
+				),
 			},
+			Commands: []string{"gh config set telemetry disabled"},
 		},
 		{
 			Name:             "Google Cloud SDK",
@@ -143,13 +138,18 @@ func Registry() []Tool {
 			DataCollection:   "Anonymized command execution metrics, timing, and error status.",
 			Binary:           "gcloud",
 			Category:         "Cloud & Deployment",
+			// Usage statistics are collected only after an explicit opt-in at
+			// install time. An unset variable is already the disabled state.
+			// A value that is set but is not a recognized opt-out still fails.
+			Default: DefaultDisabled,
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "CLOUDSDK_CORE_DISABLE_USAGE_REPORTING",
-					ValidValues: []string{"true", "True", "TRUE", "1"},
-					Description: "Disables Google Cloud SDK usage reporting",
-				},
+				CaseInsensitive(
+					"CLOUDSDK_CORE_DISABLE_USAGE_REPORTING",
+					"Disables Google Cloud SDK usage reporting",
+					"true", "1",
+				),
 			},
+			Commands: []string{"gcloud config set disable_usage_reporting true"},
 		},
 		{
 			Name:             "Hasura CLI",
@@ -159,11 +159,11 @@ func Registry() []Tool {
 			Binary:           "hasura",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "HASURA_GRAPHQL_ENABLE_TELEMETRY",
-					ValidValues: []string{"false", "False", "FALSE"},
-					Description: "Disables Hasura CLI telemetry",
-				},
+				CaseInsensitive(
+					"HASURA_GRAPHQL_ENABLE_TELEMETRY",
+					"Disables Hasura CLI telemetry",
+					"false",
+				),
 			},
 		},
 		{
@@ -173,20 +173,21 @@ func Registry() []Tool {
 			DataCollection:   "Usage data collected by Hugging Face libraries to monitor usage, debug issues, and help prioritize features.",
 			Binary:           "hf",
 			Category:         "Cloud & Deployment",
+			// The Hub client honors either the global convention or its own variable.
+			OptOut: AnyOf,
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "DO_NOT_TRACK",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Hugging Face telemetry via the global do-not-track convention",
-				},
-				{
-					Name:        "HF_HUB_DISABLE_TELEMETRY",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Hugging Face telemetry",
-				},
+				CaseInsensitive(
+					"DO_NOT_TRACK",
+					"Disables Hugging Face telemetry via the global do-not-track convention",
+					"1", "true",
+				),
+				CaseInsensitive(
+					"HF_HUB_DISABLE_TELEMETRY",
+					"Disables Hugging Face telemetry",
+					"1", "true",
+				),
 			},
 		},
-
 		{
 			Name:             "Netlify CLI",
 			Description:      "Netlify platform CLI",
@@ -195,12 +196,13 @@ func Registry() []Tool {
 			Binary:           "netlify",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "NETLIFY_TELEMETRY_DISABLED",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Netlify CLI telemetry",
-				},
+				CaseInsensitive(
+					"NETLIFY_TELEMETRY_DISABLED",
+					"Disables Netlify CLI telemetry",
+					"1", "true",
+				),
 			},
+			Commands: []string{"netlify --telemetry-disable"},
 		},
 		{
 			Name:             "Railway CLI",
@@ -209,17 +211,18 @@ func Registry() []Tool {
 			DataCollection:   "Command and subcommand names, duration, success, truncated error message, OS, architecture, CLI version, and whether the command ran in CI.",
 			Binary:           "railway",
 			Category:         "Cloud & Deployment",
+			OptOut:           AnyOf,
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "DO_NOT_TRACK",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Railway CLI telemetry via the global do-not-track convention",
-				},
-				{
-					Name:        "RAILWAY_NO_TELEMETRY",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Railway CLI telemetry",
-				},
+				CaseInsensitive(
+					"DO_NOT_TRACK",
+					"Disables Railway CLI telemetry via the global do-not-track convention",
+					"1", "true",
+				),
+				CaseInsensitive(
+					"RAILWAY_NO_TELEMETRY",
+					"Disables Railway CLI telemetry",
+					"1", "true",
+				),
 			},
 		},
 		{
@@ -230,11 +233,11 @@ func Registry() []Tool {
 			Binary:           "redocly",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "REDOCLY_TELEMETRY",
-					ValidValues: []string{"off", "OFF", "Off"},
-					Description: "Disables Redocly CLI telemetry",
-				},
+				CaseInsensitive(
+					"REDOCLY_TELEMETRY",
+					"Disables Redocly CLI telemetry",
+					"off",
+				),
 			},
 		},
 		{
@@ -245,11 +248,11 @@ func Registry() []Tool {
 			Binary:           "stripe",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "STRIPE_CLI_TELEMETRY_OPTOUT",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Stripe CLI telemetry",
-				},
+				CaseInsensitive(
+					"STRIPE_CLI_TELEMETRY_OPTOUT",
+					"Disables Stripe CLI telemetry",
+					"1", "true",
+				),
 			},
 		},
 		{
@@ -260,12 +263,13 @@ func Registry() []Tool {
 			Binary:           "turbo",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "TURBO_TELEMETRY_DISABLED",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Turborepo telemetry",
-				},
+				CaseInsensitive(
+					"TURBO_TELEMETRY_DISABLED",
+					"Disables Turborepo telemetry",
+					"1", "true",
+				),
 			},
+			Commands: []string{"turbo telemetry disable"},
 		},
 		{
 			Name:             "Vercel CLI",
@@ -275,12 +279,13 @@ func Registry() []Tool {
 			Binary:           "vercel",
 			Category:         "Cloud & Deployment",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "VERCEL_TELEMETRY_DISABLED",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Vercel CLI telemetry",
-				},
+				CaseInsensitive(
+					"VERCEL_TELEMETRY_DISABLED",
+					"Disables Vercel CLI telemetry",
+					"1", "true",
+				),
 			},
+			Commands: []string{"vercel telemetry disable"},
 		},
 
 		// ── Framework ───────────────────────────────────────────────────────────────
@@ -292,12 +297,13 @@ func Registry() []Tool {
 			Binary:           "ng",
 			Category:         "Framework",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "NG_CLI_ANALYTICS",
-					ValidValues: []string{"false", "ci", "0", "False", "FALSE"},
-					Description: "Disables Angular CLI analytics (set to false or ci)",
-				},
+				CaseInsensitive(
+					"NG_CLI_ANALYTICS",
+					"Disables Angular CLI analytics (set to false or ci)",
+					"false", "ci", "0",
+				),
 			},
+			Commands: []string{"ng analytics disable"},
 		},
 		{
 			Name:             "Astro",
@@ -307,12 +313,13 @@ func Registry() []Tool {
 			Binary:           "astro",
 			Category:         "Framework",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "ASTRO_TELEMETRY_DISABLED",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Astro telemetry",
-				},
+				CaseInsensitive(
+					"ASTRO_TELEMETRY_DISABLED",
+					"Disables Astro telemetry",
+					"1", "true",
+				),
 			},
+			Commands: []string{"astro telemetry disable"},
 		},
 		{
 			Name:             "Expo CLI",
@@ -322,11 +329,11 @@ func Registry() []Tool {
 			Binary:           "expo",
 			Category:         "Framework",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "EXPO_NO_TELEMETRY",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Expo CLI telemetry",
-				},
+				CaseInsensitive(
+					"EXPO_NO_TELEMETRY",
+					"Disables Expo CLI telemetry",
+					"1", "true",
+				),
 			},
 		},
 		{
@@ -337,12 +344,13 @@ func Registry() []Tool {
 			Binary:           "gatsby",
 			Category:         "Framework",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "GATSBY_TELEMETRY_DISABLED",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Gatsby telemetry",
-				},
+				CaseInsensitive(
+					"GATSBY_TELEMETRY_DISABLED",
+					"Disables Gatsby telemetry",
+					"1", "true",
+				),
 			},
+			Commands: []string{"gatsby telemetry --disable"},
 		},
 		{
 			Name:             "Next.js",
@@ -353,11 +361,15 @@ func Registry() []Tool {
 			Category:         "Framework",
 			EnvChecks: []EnvCheck{
 				{
+					// Next.js documents the exact value "1". Other spellings
+					// are not accepted, so this check stays case-sensitive
+					// and does not list "true".
 					Name:        "NEXT_TELEMETRY_DISABLED",
 					ValidValues: []string{"1"},
 					Description: "Disables Next.js telemetry collection",
 				},
 			},
+			Commands: []string{"next telemetry disable"},
 		},
 		{
 			Name:             "Nuxt",
@@ -367,11 +379,11 @@ func Registry() []Tool {
 			Binary:           "nuxt",
 			Category:         "Framework",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "NUXT_TELEMETRY_DISABLED",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Nuxt telemetry collection",
-				},
+				CaseInsensitive(
+					"NUXT_TELEMETRY_DISABLED",
+					"Disables Nuxt telemetry collection",
+					"1", "true",
+				),
 			},
 		},
 		{
@@ -382,12 +394,13 @@ func Registry() []Tool {
 			Binary:           "storybook",
 			Category:         "Framework",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "STORYBOOK_DISABLE_TELEMETRY",
-					ValidValues: []string{"true", "True", "TRUE"},
-					Description: "Disables Storybook telemetry",
-				},
+				CaseInsensitive(
+					"STORYBOOK_DISABLE_TELEMETRY",
+					"Disables Storybook telemetry",
+					"true",
+				),
 			},
+			Commands: []string{"npm run storybook -- --disable-telemetry"},
 		},
 
 		// ── Package Manager ─────────────────────────────────────────────────────────
@@ -399,11 +412,11 @@ func Registry() []Tool {
 			Binary:           "pod",
 			Category:         "Package Manager",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "COCOAPODS_DISABLE_STATS",
-					ValidValues: []string{"true", "True", "TRUE", "1"},
-					Description: "Disables CocoaPods stats collection",
-				},
+				CaseInsensitive(
+					"COCOAPODS_DISABLE_STATS",
+					"Disables CocoaPods stats collection",
+					"true", "1",
+				),
 			},
 		},
 		{
@@ -415,11 +428,13 @@ func Registry() []Tool {
 			Category:         "Package Manager",
 			EnvChecks: []EnvCheck{
 				{
+					// Homebrew documents the exact value "1".
 					Name:        "HOMEBREW_NO_ANALYTICS",
 					ValidValues: []string{"1"},
 					Description: "Disables Homebrew analytics reporting",
 				},
 			},
+			Commands: []string{"brew analytics off"},
 		},
 		{
 			Name:             "Poetry",
@@ -429,11 +444,11 @@ func Registry() []Tool {
 			Binary:           "poetry",
 			Category:         "Package Manager",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "POETRY_TELEMETRY_ENABLED",
-					ValidValues: []string{"0", "false", "False", "FALSE"},
-					Description: "Disables Poetry telemetry collection",
-				},
+				CaseInsensitive(
+					"POETRY_TELEMETRY_ENABLED",
+					"Disables Poetry telemetry collection",
+					"0", "false",
+				),
 			},
 		},
 		{
@@ -444,11 +459,11 @@ func Registry() []Tool {
 			Binary:           "yarn",
 			Category:         "Package Manager",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "YARN_ENABLE_TELEMETRY",
-					ValidValues: []string{"0", "false", "False", "FALSE"},
-					Description: "Disables Yarn telemetry (Yarn 2+)",
-				},
+				CaseInsensitive(
+					"YARN_ENABLE_TELEMETRY",
+					"Disables Yarn telemetry (Yarn 2+)",
+					"0", "false",
+				),
 			},
 		},
 
@@ -461,11 +476,11 @@ func Registry() []Tool {
 			Binary:           "dotnet",
 			Category:         "Runtimes & SDKs",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "DOTNET_CLI_TELEMETRY_OPTOUT",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables .NET CLI telemetry collection",
-				},
+				CaseInsensitive(
+					"DOTNET_CLI_TELEMETRY_OPTOUT",
+					"Disables .NET CLI telemetry collection",
+					"1", "true",
+				),
 			},
 		},
 		{
@@ -476,11 +491,11 @@ func Registry() []Tool {
 			Binary:           "bun",
 			Category:         "Runtimes & SDKs",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "DO_NOT_TRACK",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Bun telemetry via the global do-not-track convention",
-				},
+				CaseInsensitive(
+					"DO_NOT_TRACK",
+					"Disables Bun telemetry via the global do-not-track convention",
+					"1", "true",
+				),
 			},
 		},
 		{
@@ -491,12 +506,16 @@ func Registry() []Tool {
 			Binary:           "flutter",
 			Category:         "Runtimes & SDKs",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "FLUTTER_CLI_CRASH_REPORTING",
-					ValidValues: []string{"false", "False", "FALSE", "0"},
-					Description: "Disables Flutter CLI crash reporting",
-				},
+				CaseInsensitive(
+					"FLUTTER_CLI_CRASH_REPORTING",
+					"Disables Flutter CLI crash reporting. This does not disable general analytics.",
+					"false", "0",
+				),
 			},
+			// The analytics setting has no environment variable. The command is
+			// a hint only. A passing crash-reporting check does not mean
+			// `flutter config --no-analytics` has been run.
+			Commands: []string{"flutter config --no-analytics"},
 		},
 		{
 			Name:             "Node.js",
@@ -505,12 +524,15 @@ func Registry() []Tool {
 			DataCollection:   "Anonymous runtime and CLI telemetry in Node features that support it.",
 			Binary:           "node",
 			Category:         "Runtimes & SDKs",
+			// Both checks are required. NODE_NO_TELEMETRY is Node's own switch.
+			// DISABLE_TELEMETRY is a separate convention used by libraries that
+			// ship with Node programs. They are not alternatives.
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "DISABLE_TELEMETRY",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables telemetry for tools that respect this variable",
-				},
+				CaseInsensitive(
+					"DISABLE_TELEMETRY",
+					"Disables telemetry for tools that respect this variable",
+					"1", "true",
+				),
 				{
 					Name:        "NODE_NO_TELEMETRY",
 					ValidValues: []string{"1"},
@@ -529,11 +551,13 @@ func Registry() []Tool {
 			Category:         "Security & Observability",
 			EnvChecks: []EnvCheck{
 				{
+					// Semgrep documents the exact value "off".
 					Name:        "SEMGREP_SEND_METRICS",
 					ValidValues: []string{"off"},
 					Description: "Disables Semgrep metrics reporting",
 				},
 			},
+			Commands: []string{"semgrep --metrics=off"},
 		},
 		{
 			Name:             "Sentry CLI",
@@ -543,11 +567,11 @@ func Registry() []Tool {
 			Binary:           "sentry-cli",
 			Category:         "Security & Observability",
 			EnvChecks: []EnvCheck{
-				{
-					Name:        "SENTRY_CLI_NO_TELEMETRY",
-					ValidValues: []string{"1", "true", "True", "TRUE"},
-					Description: "Disables Sentry CLI telemetry",
-				},
+				CaseInsensitive(
+					"SENTRY_CLI_NO_TELEMETRY",
+					"Disables Sentry CLI telemetry",
+					"1", "true",
+				),
 			},
 		},
 	}
