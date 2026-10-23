@@ -263,6 +263,36 @@ func TestWriteCheckResultsDimsUnusedAnyOfAlternative(t *testing.T) {
 	}
 }
 
+func TestWriteCheckResultsShowsGitHubTelemetryOverride(t *testing.T) {
+	var buf bytes.Buffer
+	WriteCheckResults(&buf, []check.ToolResult{
+		{
+			Tool: tools.Tool{
+				Name:     "GitHub CLI",
+				Category: "Cloud",
+				OptOut:   tools.FirstSet,
+			},
+			Installed:  true,
+			AllPassing: false,
+			Checks: []check.EnvCheckResult{
+				{Check: tools.EnvCheck{Name: "GH_TELEMETRY"}, Value: "1", Passing: false, Reason: check.ReasonUnexpected},
+				{Check: tools.EnvCheck{Name: "DO_NOT_TRACK"}, Value: "1", Passing: true, Reason: check.ReasonMatched},
+			},
+		},
+	}, true)
+
+	output := buf.String()
+	if !strings.Contains(output, "GH_TELEMETRY=1") {
+		t.Fatalf("compact row missing the overriding value:\n%s", output)
+	}
+	if !strings.Contains(output, "not consulted; an earlier variable is set") {
+		t.Fatalf("compact row treated DO_NOT_TRACK as the failure:\n%s", output)
+	}
+	if strings.Contains(output, "alternative opt-out, not required") {
+		t.Fatalf("compact row hid the overriding value as an unused alternative:\n%s", output)
+	}
+}
+
 func captureStdout(t *testing.T, fn func()) string {
 	t.Helper()
 

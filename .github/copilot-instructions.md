@@ -22,8 +22,9 @@
   - resolving installation via `exec.LookPath`
   - reading environment variables with `os.Getenv`
   - marking a tool as passing only when it is installed and its `OptOut` policy is satisfied
-- `Tool.OptOut` defaults to `AllOf`: every `EnvCheck` must pass. `AnyOf` passes when one check passes. Use `AnyOf` for alternative opt-outs such as `DO_NOT_TRACK` or a tool-specific variable. Do not use `AnyOf` together with `DefaultDisabled`.
-- `Tool.Default` defaults to `DefaultEnabled`: an unset variable fails. `DefaultDisabled` means an unset variable is already opted out because the vendor collects only after an explicit opt-in. A set value that is not a recognized opt-out still fails.
+- `Tool.OptOut` defaults to `AllOf`: every `EnvCheck` must pass. `AnyOf` passes when one check passes. Use `AnyOf` for alternative opt-outs such as `DO_NOT_TRACK` or a tool-specific variable. `FirstSet` uses the first variable that is present; GitHub CLI uses it because `GH_TELEMETRY` overrides `DO_NOT_TRACK`. Do not combine `AnyOf` or `FirstSet` with `DefaultDisabled`.
+- `Tool.Default` defaults to `DefaultEnabled`: an unset variable fails. `DefaultDisabled` means an unset variable is already opted out because the vendor collects only after an explicit opt-in. Google Cloud SDK's opt-in lives in its config file, which notel does not read. A set value that is not a recognized opt-out still fails.
+- `EnvCheck.TrimSpace` compares a trimmed value and uses `LookupEnv`, so a present blank value is not the same as an unset variable. `GH_TELEMETRY` sets it. A blank opt-out is `""` in `ValidValues`, listed after the spelling `--fix` should suggest.
 - `EnvCheck.IgnoreCase` compares with `strings.EqualFold`. Prefer `CaseInsensitive(...)` and list canonical spellings once. Leave `IgnoreCase` false when the vendor documents one exact value.
 - `Tool.Commands` are CLI hints rendered by list and verbose audit output. notel must not execute them, and they must not flip `AllPassing`. A passing env check does not prove a command has been run.
 - The rendering layer in `internal/output/formatter.go` is shared by multiple commands:

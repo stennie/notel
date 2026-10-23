@@ -7,9 +7,11 @@ package tools
 // Most developer tools collect telemetry until the user opts out, so the
 // zero value is DefaultEnabled and an unset variable fails the audit.
 // A few tools do the opposite. Google Cloud SDK does not upload usage
-// statistics unless the user opted in during installation, so an unset
-// CLOUDSDK_CORE_DISABLE_USAGE_REPORTING is already the private state and
-// must not be reported as a failure.
+// statistics unless the user opted in. That choice is stored in the active
+// gcloud configuration (core/disable_usage_reporting). The environment
+// variable only overrides the property when it is set. notel does not read
+// the config file, so an opted-in install with the variable unset still
+// passes this audit.
 type DefaultState int
 
 const (
@@ -27,10 +29,14 @@ const (
 //
 // The historical rule, and the zero value, is AllOf: every variable has to
 // match. That is correct when each variable controls a distinct switch.
-// It is the wrong rule when the variables are alternatives. GitHub CLI
-// honors either GH_TELEMETRY=false or DO_NOT_TRACK=1. Forcing both made a
-// machine that had already opted out via DO_NOT_TRACK look like it was
-// still sending GitHub CLI telemetry.
+// It is the wrong rule when the variables are alternatives. Hugging Face
+// and Railway honor either DO_NOT_TRACK or their own variable. Forcing both
+// made a machine that had already opted out via DO_NOT_TRACK look like it
+// was still sending telemetry.
+//
+// GitHub CLI is not that kind of alternative. cli/cli ParseTelemetryState
+// consults GH_TELEMETRY first. Once that variable is present, DO_NOT_TRACK
+// is not read. A set GH_TELEMETRY=1 with DO_NOT_TRACK=1 still uploads.
 type Requirement int
 
 const (
@@ -41,6 +47,12 @@ const (
 	// evaluated and shown, so the report can say which alternative matched
 	// and which ones were left unset.
 	AnyOf
+
+	// FirstSet uses the first EnvCheck whose variable is present. That
+	// check has to be an opt-out. Later checks are read only when every
+	// earlier variable is absent. A present non-opt-out fails the tool
+	// even when a later alternative matches.
+	FirstSet
 )
 
 // EnvCheck defines an environment variable requirement for a tool.
@@ -60,6 +72,13 @@ type EnvCheck struct {
 	// Leave it false when the vendor documents one exact spelling, such as
 	// Homebrew's HOMEBREW_NO_ANALYTICS=1 or Next.js's NEXT_TELEMETRY_DISABLED=1.
 	IgnoreCase bool
+
+	// TrimSpace removes leading and trailing whitespace before comparison
+	// and treats a present-but-blank variable as present. os.Getenv cannot
+	// tell "unset" from "set to empty", so this check uses LookupEnv.
+	// Leave it false for vendors that do not trim. A blank value is an
+	// opt-out only when ValidValues contains "".
+	TrimSpace bool
 
 	// Description is the human-readable line shown in verbose and list output.
 	Description string
@@ -85,7 +104,8 @@ type Tool struct {
 	Default DefaultState
 
 	// OptOut combines EnvChecks. Leave it as AllOf unless any one of the
-	// variables is sufficient on its own.
+	// variables is sufficient on its own, or a present variable must win
+	// over the later alternatives (FirstSet).
 	OptOut Requirement
 
 	EnvChecks []EnvCheck

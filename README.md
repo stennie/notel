@@ -34,13 +34,18 @@ Each registry entry declares the rule the audit applies:
 
 - `OptOut` defaults to `AllOf`. Every environment variable has to match.
   Use this when the variables are independent switches.
-- `OptOut: AnyOf` passes when one variable matches. GitHub CLI, Hugging Face
-  CLI, and Railway CLI use this because `DO_NOT_TRACK` is an alternative to
-  the tool-specific variable, not a second requirement.
+- `OptOut: AnyOf` passes when one variable matches. Hugging Face CLI and
+  Railway CLI use this because `DO_NOT_TRACK` is an alternative to the
+  tool-specific variable, not a second requirement.
+- `OptOut: FirstSet` uses the first variable that is present. GitHub CLI
+  uses this because a set `GH_TELEMETRY` decides, and `DO_NOT_TRACK` applies
+  only when `GH_TELEMETRY` is absent. `GH_TELEMETRY=1` with `DO_NOT_TRACK=1`
+  still fails.
 - `Default: DefaultDisabled` means an unset variable is already opted out.
-  Google Cloud SDK uses this because usage statistics are collected only
-  after an explicit opt-in. A value that is set to something notel does not
-  recognize still fails.
+  Google Cloud SDK uses this because a default install does not collect
+  usage statistics. The install-time choice is stored in gcloud's active
+  configuration, which notel does not read. A value that is set to something
+  notel does not recognize still fails.
 - `IgnoreCase` accepts any capitalization of the listed spellings. Tools that
   document one exact value, such as Homebrew's `1` and Next.js's `1`, stay
   case-sensitive.

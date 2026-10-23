@@ -114,22 +114,14 @@ func Registry() []Tool {
 			DataCollection:   "Command usage, feature usage, and diagnostic telemetry from the GitHub CLI.",
 			Binary:           "gh",
 			Category:         "Cloud & Deployment",
-			// Either variable is a complete opt-out. Requiring both reported a
-			// failure on machines that had already set DO_NOT_TRACK=1.
-			OptOut: AnyOf,
-			EnvChecks: []EnvCheck{
-				CaseInsensitive(
-					"GH_TELEMETRY",
-					"Disables GitHub CLI telemetry",
-					"false",
-				),
-				CaseInsensitive(
-					"DO_NOT_TRACK",
-					"Disables GitHub CLI telemetry via the global do-not-track convention",
-					"1", "true",
-				),
-			},
-			Commands: []string{"gh config set telemetry disabled"},
+			// cli/cli reads GH_TELEMETRY before DO_NOT_TRACK. A present
+			// GH_TELEMETRY that is not an opt-out enables upload and never
+			// consults DO_NOT_TRACK, so AnyOf would report a false pass.
+			// Blank, after trim, is an opt-out. "log" does not upload, but
+			// it is a debug mode rather than an opt-out, so it stays a failure.
+			OptOut:    FirstSet,
+			EnvChecks: githubCLIEnvChecks(),
+			Commands:  []string{"gh config set telemetry disabled"},
 		},
 		{
 			Name:             "Google Cloud SDK",
@@ -138,9 +130,11 @@ func Registry() []Tool {
 			DataCollection:   "Anonymized command execution metrics, timing, and error status.",
 			Binary:           "gcloud",
 			Category:         "Cloud & Deployment",
-			// Usage statistics are collected only after an explicit opt-in at
-			// install time. An unset variable is already the disabled state.
-			// A value that is set but is not a recognized opt-out still fails.
+			// A default install does not collect usage statistics. The opt-in is
+			// the active config property core/disable_usage_reporting, which
+			// notel does not read. This variable overrides that property only
+			// when it is set, so an opted-in install with the variable unset
+			// still passes. A set value that is not a recognized opt-out fails.
 			Default: DefaultDisabled,
 			EnvChecks: []EnvCheck{
 				CaseInsensitive(
@@ -575,4 +569,25 @@ func Registry() []Tool {
 			},
 		},
 	}
+}
+
+// githubCLIEnvChecks returns GH_TELEMETRY, then DO_NOT_TRACK.
+//
+// Order is the precedence. TrimSpace is set because cli/cli trims and
+// lowercases both variables, and a present blank GH_TELEMETRY is falsey.
+// The blank spelling is "" so --fix suggests "false", the first value.
+func githubCLIEnvChecks() []EnvCheck {
+	telemetry := CaseInsensitive(
+		"GH_TELEMETRY",
+		"Disables GitHub CLI telemetry when set. false, 0, no, disabled, off, and a blank value opt out. Any other set value, including log, enables or logs telemetry and overrides DO_NOT_TRACK.",
+		"false", "0", "no", "disabled", "off", "",
+	)
+	telemetry.TrimSpace = true
+	doNotTrack := CaseInsensitive(
+		"DO_NOT_TRACK",
+		"Disables GitHub CLI telemetry when GH_TELEMETRY is absent",
+		"1", "true",
+	)
+	doNotTrack.TrimSpace = true
+	return []EnvCheck{telemetry, doNotTrack}
 }

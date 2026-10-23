@@ -13,8 +13,9 @@ import (
 // Tests replace them and restore the originals with t.Cleanup. They are
 // package state, so those tests must not run in parallel with each other.
 var (
-	lookPath = exec.LookPath
-	getEnv   = os.Getenv
+	lookPath  = exec.LookPath
+	getEnv    = os.Getenv
+	lookupEnv = os.LookupEnv
 )
 
 // Reason explains one environment-variable outcome.
@@ -135,6 +136,10 @@ func auditTool(t tools.Tool) ToolResult {
 // AnyOf passes on the first success. Use it when the vendor accepts
 // alternative opt-outs. A failing alternative is still present in the
 // result slice; only the combined AllPassing bit changes.
+//
+// FirstSet returns the result of the first check whose variable is present.
+// Absence is ReasonUnset or ReasonDefaultOff. A present non-opt-out fails
+// the tool before later alternatives are considered.
 func policySatisfied(req tools.Requirement, checks []EnvCheckResult) bool {
 	if len(checks) == 0 {
 		return true
@@ -145,6 +150,14 @@ func policySatisfied(req tools.Requirement, checks []EnvCheckResult) bool {
 			if cr.Passing {
 				return true
 			}
+		}
+		return false
+	case tools.FirstSet:
+		for _, cr := range checks {
+			if cr.Reason == ReasonUnset || cr.Reason == ReasonDefaultOff {
+				continue
+			}
+			return cr.Passing
 		}
 		return false
 	default:
@@ -163,19 +176,21 @@ func policySatisfied(req tools.Requirement, checks []EnvCheckResult) bool {
 // passes only when the whole tool is DefaultDisabled. A set-but-unknown
 // value fails even then: the user typed something, and it was not an opt-out.
 func checkEnvVar(chk tools.EnvCheck, def tools.DefaultState) EnvCheckResult {
-	value := getEnv(chk.Name)
-	if value == "" {
-		if def == tools.DefaultDisabled {
-			return EnvCheckResult{
-				Check:   chk,
-				Passing: true,
-				Reason:  ReasonDefaultOff,
-			}
+	// TrimSpace checks must see a present blank value. os.Getenv returns ""
+	// for both "unset" and "set to empty", and gh treats those differently:
+	// an absent GH_TELEMETRY falls through to DO_NOT_TRACK, while a blank
+	// GH_TELEMETRY is one of the falsey opt-outs.
+	var value string
+	if chk.TrimSpace {
+		raw, present := lookupEnv(chk.Name)
+		if !present {
+			return unsetResult(chk, def)
 		}
-		return EnvCheckResult{
-			Check:   chk,
-			Passing: false,
-			Reason:  ReasonUnset,
+		value = strings.TrimSpace(raw)
+	} else {
+		value = getEnv(chk.Name)
+		if value == "" {
+			return unsetResult(chk, def)
 		}
 	}
 	if valueAccepted(chk, value) {
@@ -191,6 +206,21 @@ func checkEnvVar(chk tools.EnvCheck, def tools.DefaultState) EnvCheckResult {
 		Value:   value,
 		Passing: false,
 		Reason:  ReasonUnexpected,
+	}
+}
+
+func unsetResult(chk tools.EnvCheck, def tools.DefaultState) EnvCheckResult {
+	if def == tools.DefaultDisabled {
+		return EnvCheckResult{
+			Check:   chk,
+			Passing: true,
+			Reason:  ReasonDefaultOff,
+		}
+	}
+	return EnvCheckResult{
+		Check:   chk,
+		Passing: false,
+		Reason:  ReasonUnset,
 	}
 }
 

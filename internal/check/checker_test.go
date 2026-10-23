@@ -271,7 +271,10 @@ func TestAuditToolAnyOfPassesWhenOneAlternativeMatches(t *testing.T) {
 	lookPath = func(file string) (string, error) {
 		return "/usr/local/bin/" + file, nil
 	}
+	// Pin both names. An inherited DO_NOT_TRACK or GH_TELEMETRY would make
+	// the "unset" assertion depend on the machine running the test.
 	t.Setenv("DO_NOT_TRACK", "1")
+	t.Setenv("GH_TELEMETRY", "")
 
 	got := auditTool(tools.Tool{
 		Name:   "GitHub CLI",
@@ -298,6 +301,8 @@ func TestAuditToolAnyOfFailsWhenNoAlternativeMatches(t *testing.T) {
 	originalLookPath := lookPath
 	t.Cleanup(func() { lookPath = originalLookPath })
 	lookPath = func(string) (string, error) { return "/bin/gh", nil }
+	t.Setenv("GH_TELEMETRY", "")
+	t.Setenv("DO_NOT_TRACK", "")
 
 	got := auditTool(tools.Tool{
 		Name:   "GitHub CLI",
@@ -311,4 +316,114 @@ func TestAuditToolAnyOfFailsWhenNoAlternativeMatches(t *testing.T) {
 	if got.AllPassing {
 		t.Fatal("AnyOf tool passed with neither alternative set")
 	}
+}
+
+func TestGitHubCLITelemetryPrecedence(t *testing.T) {
+	tool := githubCLITool(t)
+	originalLookPath := lookPath
+	originalLookup := lookupEnv
+	originalGet := getEnv
+	t.Cleanup(func() {
+		lookPath = originalLookPath
+		lookupEnv = originalLookup
+		getEnv = originalGet
+	})
+	lookPath = func(file string) (string, error) {
+		return "/usr/local/bin/" + file, nil
+	}
+
+	tests := []struct {
+		name      string
+		env       map[string]string
+		wantPass  bool
+		wantGH    Reason
+		wantTrack Reason
+	}{
+		{
+			name:      "do not track when GH_TELEMETRY is absent",
+			env:       map[string]string{"DO_NOT_TRACK": "1"},
+			wantPass:  true,
+			wantGH:    ReasonUnset,
+			wantTrack: ReasonMatched,
+		},
+		{
+			name:      "false opts out on its own",
+			env:       map[string]string{"GH_TELEMETRY": " false "},
+			wantPass:  true,
+			wantGH:    ReasonMatched,
+			wantTrack: ReasonUnset,
+		},
+		{
+			name:      "blank GH_TELEMETRY is an opt-out",
+			env:       map[string]string{"GH_TELEMETRY": ""},
+			wantPass:  true,
+			wantGH:    ReasonMatched,
+			wantTrack: ReasonUnset,
+		},
+		{
+			name:      "zero opts out",
+			env:       map[string]string{"GH_TELEMETRY": "0"},
+			wantPass:  true,
+			wantGH:    ReasonMatched,
+			wantTrack: ReasonUnset,
+		},
+		{
+			name:      "enabled value is not rescued by DO_NOT_TRACK",
+			env:       map[string]string{"GH_TELEMETRY": "1", "DO_NOT_TRACK": "1"},
+			wantPass:  false,
+			wantGH:    ReasonUnexpected,
+			wantTrack: ReasonMatched,
+		},
+		{
+			name:      "log is not an opt-out",
+			env:       map[string]string{"GH_TELEMETRY": "log", "DO_NOT_TRACK": "true"},
+			wantPass:  false,
+			wantGH:    ReasonUnexpected,
+			wantTrack: ReasonMatched,
+		},
+		{
+			name:      "neither variable set",
+			env:       map[string]string{},
+			wantPass:  false,
+			wantGH:    ReasonUnset,
+			wantTrack: ReasonUnset,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			lookupEnv = func(key string) (string, bool) {
+				value, ok := tt.env[key]
+				return value, ok
+			}
+			getEnv = func(key string) string {
+				value, ok := tt.env[key]
+				if !ok {
+					return ""
+				}
+				return value
+			}
+			got := auditTool(tool)
+			if got.AllPassing != tt.wantPass {
+				t.Fatalf("AllPassing = %v, want %v (checks %#v)", got.AllPassing, tt.wantPass, got.Checks)
+			}
+			if got.Checks[0].Reason != tt.wantGH {
+				t.Fatalf("GH_TELEMETRY reason = %v, want %v (value %q)", got.Checks[0].Reason, tt.wantGH, got.Checks[0].Value)
+			}
+			if got.Checks[1].Reason != tt.wantTrack {
+				t.Fatalf("DO_NOT_TRACK reason = %v, want %v", got.Checks[1].Reason, tt.wantTrack)
+			}
+		})
+	}
+}
+
+func githubCLITool(t *testing.T) tools.Tool {
+	t.Helper()
+	for _, tool := range tools.Registry() {
+		if tool.Name == "GitHub CLI" {
+			return tool
+		}
+	}
+	t.Fatal("registry missing GitHub CLI")
+	return tools.Tool{}
 }

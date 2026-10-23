@@ -59,7 +59,7 @@ func TestRegistryOptOutPolicies(t *testing.T) {
 		byName[tool.Name] = tool
 	}
 
-	anyOf := []string{"GitHub CLI", "Hugging Face CLI", "Railway CLI"}
+	anyOf := []string{"Hugging Face CLI", "Railway CLI"}
 	for _, name := range anyOf {
 		tool, ok := byName[name]
 		if !ok {
@@ -71,6 +71,17 @@ func TestRegistryOptOutPolicies(t *testing.T) {
 		if len(tool.EnvChecks) < 2 {
 			t.Fatalf("%s AnyOf policy needs at least two env checks", name)
 		}
+	}
+
+	githubCLI := byName["GitHub CLI"]
+	if githubCLI.OptOut != FirstSet {
+		t.Fatalf("GitHub CLI OptOut = %v, want FirstSet", githubCLI.OptOut)
+	}
+	if len(githubCLI.EnvChecks) != 2 || githubCLI.EnvChecks[0].Name != "GH_TELEMETRY" || !githubCLI.EnvChecks[0].TrimSpace {
+		t.Fatalf("GitHub CLI checks = %#v, want GH_TELEMETRY then DO_NOT_TRACK with trim", githubCLI.EnvChecks)
+	}
+	if githubCLI.EnvChecks[0].ValidValues[0] != "false" {
+		t.Fatalf("GH_TELEMETRY preferred value = %q, want false", githubCLI.EnvChecks[0].ValidValues[0])
 	}
 
 	gcloud := byName["Google Cloud SDK"]
@@ -90,6 +101,9 @@ func TestRegistryOptOutPolicies(t *testing.T) {
 	for _, tool := range Registry() {
 		if tool.OptOut == AnyOf && tool.Default == DefaultDisabled {
 			t.Fatalf("%s combines AnyOf with DefaultDisabled", tool.Name)
+		}
+		if tool.OptOut == FirstSet && tool.Default == DefaultDisabled {
+			t.Fatalf("%s combines FirstSet with DefaultDisabled", tool.Name)
 		}
 	}
 
