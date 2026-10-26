@@ -202,6 +202,97 @@ func TestPrintReportResultsShowsDetectedEnvForUninstalledToolWhenIncluded(t *tes
 	}
 }
 
+func TestWriteReportResultsShowsDefaultOffAndUnverifiedCommand(t *testing.T) {
+	var buf bytes.Buffer
+	WriteReportResults(&buf, []check.ToolResult{
+		{
+			Tool: tools.Tool{
+				Name:             "Google Cloud SDK",
+				Category:         "Cloud",
+				DocumentationURL: "https://docs.example.com/gcloud",
+				Default:          tools.DefaultDisabled,
+				Commands:         []string{"gcloud config set disable_usage_reporting true"},
+			},
+			Installed:  true,
+			BinaryPath: "/usr/local/bin/gcloud",
+			AllPassing: true,
+			Checks: []check.EnvCheckResult{{
+				Check:   tools.EnvCheck{Name: "CLOUDSDK_CORE_DISABLE_USAGE_REPORTING"},
+				Passing: true,
+				Reason:  check.ReasonDefaultOff,
+			}},
+		},
+	}, true)
+
+	output := buf.String()
+	for _, want := range []string{
+		"not set; telemetry is off unless you opt in",
+		"→ also (not verified):",
+		"gcloud config set disable_usage_reporting true",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("WriteReportResults output missing %q:\n%s", want, output)
+		}
+	}
+}
+
+func TestWriteCheckResultsDimsUnusedAnyOfAlternative(t *testing.T) {
+	var buf bytes.Buffer
+	WriteCheckResults(&buf, []check.ToolResult{
+		{
+			Tool: tools.Tool{
+				Name:     "GitHub CLI",
+				Category: "Cloud",
+				OptOut:   tools.AnyOf,
+			},
+			Installed:  true,
+			AllPassing: true,
+			Checks: []check.EnvCheckResult{
+				{Check: tools.EnvCheck{Name: "GH_TELEMETRY"}, Passing: false, Reason: check.ReasonUnset},
+				{Check: tools.EnvCheck{Name: "DO_NOT_TRACK", ValidValues: []string{"1"}}, Value: "1", Passing: true, Reason: check.ReasonMatched},
+			},
+		},
+	}, true)
+
+	output := buf.String()
+	if !strings.Contains(output, "alternative opt-out, not required") {
+		t.Fatalf("compact AnyOf row missing unused-alternative hint:\n%s", output)
+	}
+	if !strings.Contains(output, "DO_NOT_TRACK=1") {
+		t.Fatalf("compact AnyOf row missing the matching variable:\n%s", output)
+	}
+}
+
+func TestWriteCheckResultsShowsGitHubTelemetryOverride(t *testing.T) {
+	var buf bytes.Buffer
+	WriteCheckResults(&buf, []check.ToolResult{
+		{
+			Tool: tools.Tool{
+				Name:     "GitHub CLI",
+				Category: "Cloud",
+				OptOut:   tools.FirstSet,
+			},
+			Installed:  true,
+			AllPassing: false,
+			Checks: []check.EnvCheckResult{
+				{Check: tools.EnvCheck{Name: "GH_TELEMETRY"}, Value: "1", Passing: false, Reason: check.ReasonUnexpected},
+				{Check: tools.EnvCheck{Name: "DO_NOT_TRACK"}, Value: "1", Passing: true, Reason: check.ReasonMatched},
+			},
+		},
+	}, true)
+
+	output := buf.String()
+	if !strings.Contains(output, "GH_TELEMETRY=1") {
+		t.Fatalf("compact row missing the overriding value:\n%s", output)
+	}
+	if !strings.Contains(output, "not consulted; an earlier variable is set") {
+		t.Fatalf("compact row treated DO_NOT_TRACK as the failure:\n%s", output)
+	}
+	if strings.Contains(output, "alternative opt-out, not required") {
+		t.Fatalf("compact row hid the overriding value as an unused alternative:\n%s", output)
+	}
+}
+
 func captureStdout(t *testing.T, fn func()) string {
 	t.Helper()
 

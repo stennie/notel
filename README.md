@@ -28,6 +28,32 @@ The initial design goal focuses on environment variable configuration to
 keep the scope maintainable. `notel` does not make any changes to your
 environment or run any CLI commands.
 
+### How a tool passes
+
+Each registry entry declares the rule the audit applies:
+
+- `OptOut` defaults to `AllOf`. Every environment variable has to match.
+  Use this when the variables are independent switches.
+- `OptOut: AnyOf` passes when one variable matches. Hugging Face CLI and
+  Railway CLI use this because `DO_NOT_TRACK` is an alternative to the
+  tool-specific variable, not a second requirement.
+- `OptOut: FirstSet` uses the first variable that is present. GitHub CLI
+  uses this because a set `GH_TELEMETRY` decides, and `DO_NOT_TRACK` applies
+  only when `GH_TELEMETRY` is absent. `GH_TELEMETRY=1` with `DO_NOT_TRACK=1`
+  still fails.
+- `Default: DefaultDisabled` means an unset variable is already opted out.
+  Google Cloud SDK uses this because a default install does not collect
+  usage statistics. The install-time choice is stored in gcloud's active
+  configuration, which notel does not read. A value that is set to something
+  notel does not recognize still fails.
+- `IgnoreCase` accepts any capitalization of the listed spellings. Tools that
+  document one exact value, such as Homebrew's `1` and Next.js's `1`, stay
+  case-sensitive.
+- `Commands` lists CLI hints such as `brew analytics off` and
+  `flutter config --no-analytics`. notel prints them in `list` and
+  `audit --verbose`. It does not run them, and a passing environment check
+  does not prove the command has been run.
+
 ### Why disable telemetry?
 
 - Disabling telemetry exercises your rights to privacy and control over your
@@ -254,17 +280,25 @@ Add an entry to `internal/tools/registry.go`:
     Description: "Description of the tool",
     DocumentationURL: "https://example.com/docs/telemetry",
     DataCollection:   "Anonymous command usage and diagnostic metadata.",
-    Binary:           "mytool",        // binary name checked via PATH
+    Binary:           "mytool", // binary name checked via PATH
     Category:         "Framework",
+    // OptOut: AnyOf,                 // set only when one variable is enough
+    // Default: DefaultDisabled,      // set only when collection is opt-in
     EnvChecks: []EnvCheck{
-        {
-            Name:        "MYTOOL_TELEMETRY_DISABLED",
-            ValidValues: []string{"1", "true"},
-            Description: "Disables My Tool telemetry",
-        },
+        CaseInsensitive(
+            "MYTOOL_TELEMETRY_DISABLED",
+            "Disables My Tool telemetry",
+            "1", "true", // first value is what --fix suggests
+        ),
     },
+    Commands: []string{"mytool telemetry disable"}, // printed, never executed
 },
 ```
+
+`CaseInsensitive` lists each canonical spelling once. Use an `EnvCheck`
+literal with `IgnoreCase: false` when the vendor accepts only one exact
+value. Leave `OptOut` and `Default` at their zero values unless the tool's
+documentation says otherwise.
 
 Keep registry entries sorted alphabetically by `Category` and then by `Name`.
 

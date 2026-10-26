@@ -21,7 +21,12 @@
 - The audit engine in `internal/check/checker.go` turns registry entries into `ToolResult` values by:
   - resolving installation via `exec.LookPath`
   - reading environment variables with `os.Getenv`
-  - marking a tool as passing only when it is installed and every env check passes
+  - marking a tool as passing only when it is installed and its `OptOut` policy is satisfied
+- `Tool.OptOut` defaults to `AllOf`: every `EnvCheck` must pass. `AnyOf` passes when one check passes. Use `AnyOf` for alternative opt-outs such as `DO_NOT_TRACK` or a tool-specific variable. `FirstSet` uses the first variable that is present; GitHub CLI uses it because `GH_TELEMETRY` overrides `DO_NOT_TRACK`. Do not combine `AnyOf` or `FirstSet` with `DefaultDisabled`.
+- `Tool.Default` defaults to `DefaultEnabled`: an unset variable fails. `DefaultDisabled` means an unset variable is already opted out because the vendor collects only after an explicit opt-in. Google Cloud SDK's opt-in lives in its config file, which notel does not read. A set value that is not a recognized opt-out still fails.
+- `EnvCheck.TrimSpace` compares a trimmed value and uses `LookupEnv`, so a present blank value is not the same as an unset variable. `GH_TELEMETRY` sets it. A blank opt-out is `""` in `ValidValues`, listed after the spelling `--fix` should suggest.
+- `EnvCheck.IgnoreCase` compares with `strings.EqualFold`. Prefer `CaseInsensitive(...)` and list canonical spellings once. Leave `IgnoreCase` false when the vendor documents one exact value.
+- `Tool.Commands` are CLI hints rendered by list and verbose audit output. notel must not execute them, and they must not flip `AllPassing`. A passing env check does not prove a command has been run.
 - The rendering layer in `internal/output/formatter.go` is shared by multiple commands:
   - `audit` prints a compact installed-tool view by default, switches to the detailed per-tool block when `--verbose` is set, and can print shell-specific fix commands when `--fix` is used
   - `list` reuses registry-driven results so it can show the documented env vars alongside current installation status
@@ -33,8 +38,10 @@
 - Keep the registry as the only place where supported tools are defined. Adding a tool means adding one `Tool` entry with its `EnvChecks`; command handlers should not duplicate tool metadata.
 - A `Tool` with an empty `Binary` is treated as always installed. Preserve that behavior for env-only checks instead of adding special cases elsewhere.
 - `EnvCheck.ValidValues` is authoritative:
-  - if it contains values, the env var must exactly match one of them
+  - if it contains values, the env var must match one of them, using `strings.EqualFold` when `IgnoreCase` is set and an exact string comparison otherwise
   - if it is empty, any non-empty value counts as opted out
+  - the first value is the spelling `notel audit --fix` suggests
+- The policy types live in `internal/tools/types.go`. `internal/tools/registry.go` only lists tools.
 - Keep `internal/tools/registry.go` sorted alphabetically by `Category` and then by `Name`. That ordering also drives the grouped UI output.
 - `audit` hides uninstalled tools unless `--all` is set, whether it is in compact or `--verbose` mode. `list` operates over the full registry, so changes to filtering should be made deliberately across commands.
 - Styling and output rules belong in `internal/output/formatter.go`, not in Cobra handlers. Prefer extending the output package over spreading Lipgloss formatting through command files.
